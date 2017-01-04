@@ -1,0 +1,64 @@
+div.stacked-percentage{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
+    position: relative;
+
+    > table {
+        flex-shrink: 0;
+        flex-grow: 0;
+    }
+
+    > canvas.plot{
+        flex-shrink: 1;
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    > canvas.overlay{
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+    }
+
+}
+    
+table.data-table{
+    margin-left: 60px;
+    border-collapse: collapse;
+    color: rgba(255,255,255,0.5);
+
+    tr td:first-child{
+        width: 10px;
+    }
+
+    td{
+        border: 1px solid rgb(64,64,64);
+        padding: 2px;
+        text-align: right;
+    }
+
+    td.percent{
+        width: 50px;
+    }
+
+    td.bar{
+        width: 110px;
+        div{
+            width: 0px;
+            height: 10px;
+            background-color: #348CFF;
+        }
+    }
+
+    thead td{
+        font-weight: bold;
+        text-align: center;
+    }
+}

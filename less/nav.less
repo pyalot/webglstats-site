@@ -1,0 +1,180 @@
+body > nav{
+    width: @sidebarWidth;
+    transition: width 0.25s;
+
+    @media(max-width: 760px){
+        width: 0px;
+    }
+}
+
+body.sidebar > nav{
+    width: @sidebarWidth;
+
+    @media(max-width: 760px){
+        box-shadow: 10px 0px 20px 0px rgba(0,0,0,0.5);
+    }
+}
+
+body > nav{
+    position: fixed;
+    top: 0px;
+    left: 0px;
+
+    height: 100%;
+    padding-top: @headerHeight;
+    background-color: @medium;
+    z-index: 1;
+
+    div.content{
+        height: 100%;
+
+        > div{
+            border-bottom: 1px solid rgb(32,32,32);
+
+            &.expanded > a > span.arrow{
+                transform: translateY(-50%) rotate(-90deg);
+            }
+
+            &.sub > a{
+                padding-left: 25px;
+            }
+
+            > a{
+                display: block;
+                padding-left: 5px;
+                height: 50px;
+                line-height: 50px;
+                position: relative;
+                cursor: pointer;
+
+                transition: background-color 0.3s;
+
+                &:hover{
+                    background-color: #3e4852;
+                }
+
+                > span.arrow{
+                    position: absolute;
+                    right: 6px;
+                    top: 50%;
+                    transform: translateY(-50%) rotate(0deg);
+                    transition: transform 0.2s;
+
+                    display: inline-block;
+                    width: 0px;
+                    height: 0px;
+                    border-top: 5px solid transparent;
+                    border-bottom: 5px solid transparent;
+                    border-right: 5px solid white;
+                }
+            }
+            > div{
+                transition: height 0.4s;
+                display: none;
+
+                overflow: hidden;
+                background-color: #3e3d3b;
+
+                /*
+                > ul{
+                    border-top: 1px solid rgb(32,32,32);
+                    padding-top: 5px;
+                    padding-bottom: 5px;
+
+                }
+                */
+
+                div{
+                    border: 1px solid rgb(32,32,32);
+                    margin: 1px;
+                    margin-top: 2px;
+                    margin-right: 5px;
+                    padding: 1px;
+                    padding-left: 35px;
+                    position: relative;
+                    background-color: rgba(255,255,255,0.1);
+                    font-size: 14px;
+
+                    > span.arrow{
+                        position: absolute;
+                        left: 6px;
+                        top: 50%;
+                        transform: translateY(-50%) rotate(-90deg);
+                        //transition: transform 0.2s;
+
+                        display: inline-block;
+                        width: 0px;
+                        height: 0px;
+                        border-top: 5px solid transparent;
+                        border-bottom: 5px solid transparent;
+                        border-right: 5px solid white;
+                    }
+
+                    &.expanded > span.arrow{
+                        transform: translateY(-50%) rotate(-90deg);
+                    }
+                    
+                    &.collapsed > span.arrow{
+                        transform: translateY(-50%) rotate(-180deg);
+                    }
+
+                    > span.checkbox{
+                        position: absolute;
+                        display: inline-block;
+                        left: 18px;
+                        top: 50%;
+                        width: 12px;
+                        height: 12px;
+                        // border: 1px solid rgba(255,255,255,0.5);
+                        background-image: url("/img/checkbox.png");
+
+                        &.unchecked{
+                            background-position: left 0px top 0px; // empty
+                        }
+                        &.checked{
+                            background-position: left 12px top 0px; // checked
+                        }
+                        &.semichecked{
+                            background-position: left 24px top 0px; // semi
+                        }
+
+                        transform: translateY(-50%);
+                    }
+                }
+
+                li{
+                    margin-left: 12px;
+                }
+            }
+            > ul{
+                transition: height 0.4s;
+                display: none;
+
+                overflow: hidden;
+                background-color: #3e3d3b;
+                > li{
+                    transition: border-width 0.25s;
+                    border-right: 0px solid #c57f00;
+                    &.active{
+                        border-right: 5px solid #c57f00;
+                    }
+                    > a{
+                        display: block;
+                        font-size: 12px;
+                        padding-left: 10px;
+                        padding-top: 9px;
+                        padding-bottom: 9px;
+                        border-top: 1px solid rgb(32,32,32);
+                        cursor: pointer;
+                    
+                        transition: background-color 0.3s;
+
+                        &:hover{
+                            background-color: #545351;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
