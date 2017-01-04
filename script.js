@@ -242,7 +242,7 @@ info = {
   },
   color_buffer_float: {
     prefix: 'WEBGL',
-    description: 'This extension allows to render into a floating point texture.',
+    description: 'This extension allows to render into a floating point texture. \n<br/><br/>\nFor historical reasons this is not reliably indicative of renderable floating point textures, and actual support has to be tested individually.',
     spec: '/extensions/WEBGL_color_buffer_float/'
   },
   color_buffer_half_float: {
