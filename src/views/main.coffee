@@ -30,13 +30,17 @@ exports.index = class Main extends Navigatable
         </p>''').appendTo(widget)
         
         $('''<p>
-            If you want to help just embedd the code below into your page.
+            If you want help collecting data just embedd the code below into your page.
         </p>''').appendTo(widget)
         
         $('''
             <pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;
                 defer async&gt;&lt;/script&gt;</pre>''')
             .appendTo(widget)
+        
+        $('''<p>
+            You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.
+        </p>''').appendTo(widget)
 
         col = $('<div></div>')
             .appendTo(row)

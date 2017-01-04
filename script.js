@@ -905,8 +905,9 @@ exports.index = Main = (function(superClass) {
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1>WebGL</h1>').appendTo(widget);
     $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(widget);
-    $('<p>\n    If you want to help just embedd the code below into your page.\n</p>').appendTo(widget);
+    $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(widget);
     $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;\n    defer async&gt;&lt;/script&gt;</pre>').appendTo(widget);
+    $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(widget);
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1>Support (30 days)</h1>').appendTo(widget);
