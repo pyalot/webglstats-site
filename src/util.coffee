@@ -19,3 +19,14 @@ exports.after = (timeout, fun) ->
 exports.nextFrame = (fun) ->
     requestAnimationFrame(fun)
 
+exports.formatNumber = (n) ->
+    if n < 1e3
+        return n.toFixed(0)
+    else if n >= 1e3 and n < 1e6
+        return (n/1e3).toFixed(1) + 'k'
+    else if n >= 1e6 and n < 1e9
+        return (n/1e6).toFixed(1) + 'M'
+    else if n >= 1e9 and n < 1e12
+        return (n/1e9).toFixed(1) + 'G'
+    else
+        return (n/1e12).toFixed(1) + 'T'

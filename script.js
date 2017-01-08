@@ -226,9 +226,11 @@ exports.index = Views = (function() {
 })();
 });
 moduleManager.module('/views/extensions', function(exports,sys){
-var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, info, names, ref;
+var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, info, names, ref, util;
 
 db = sys["import"]('db');
+
+util = sys["import"]('/util');
 
 ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series, StackedPercentage = ref.StackedPercentage;
 
@@ -452,12 +454,14 @@ exports.index = Extensions = (function() {
           return db.execute({
             query: query,
             success: function(result) {
+              var percentage;
               if (result.total > 0) {
-                result = result.values[1] / result.total;
+                percentage = result.values[1] / result.total;
               } else {
-                result = 0;
+                percentage = 0;
               }
-              chart.update(result * 100);
+              chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+              chart.update(percentage * 100);
               return chart.elem.removeClass('spinner');
             }
           });
@@ -875,13 +879,15 @@ exports.index = Parameters = (function() {
 })();
 });
 moduleManager.module('/views/main', function(exports,sys){
-var Gauge, Main, Navigatable, Parameters, Series, db, extensions, ref,
+var Gauge, Main, Navigatable, Parameters, Series, db, extensions, ref, util,
   extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   hasProp = {}.hasOwnProperty;
 
 db = sys["import"]('db');
 
 extensions = sys["import"]('extensions');
+
+util = sys["import"]('/util');
 
 Parameters = sys["import"]('parameters');
 
@@ -967,8 +973,10 @@ exports.index = Main = (function(superClass) {
           return db.execute({
             query: query,
             success: function(result) {
-              result = result.values[1] / result.total;
-              chart.update(result * 100);
+              var percentage;
+              percentage = result.values[1] / result.total;
+              chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+              chart.update(percentage * 100);
               return chart.elem.removeClass('spinner');
             }
           });
@@ -1813,10 +1821,16 @@ exports.index = Gauge = (function() {
     });
     percent = $('<div class="percent">0%</div>').appendTo(this.elem)[0];
     if (label != null) {
-      $('<label></label>').text(label).appendTo(this.elem);
+      this.label = $('<label></label>').text(label).appendTo(this.elem);
     }
     this.chart = this.elem.data('easyPieChart');
   }
+
+  Gauge.prototype.setLabel = function(text) {
+    if (this.label != null) {
+      return this.label.text(text);
+    }
+  };
 
   Gauge.prototype.update = function(value) {
     if (isNaN(value)) {
@@ -1830,7 +1844,9 @@ exports.index = Gauge = (function() {
 })();
 });
 moduleManager.module('/chart/series', function(exports,sys){
-var Series, smooth;
+var Series, smooth, util;
+
+util = sys["import"]('/util');
 
 smooth = function(size, src) {
   var i, j, k, l, ref, ref1, ref2, sum, values;
@@ -1888,7 +1904,7 @@ exports.index = Series = (function() {
         } else {
           value = 0;
         }
-        return "<span>" + item.name + " - " + (value.toFixed(0)) + "%</span>";
+        return "<span>" + item.name + " - " + (value.toFixed(0)) + "%<br/>(" + (util.formatNumber(item.total)) + " samples)</span>";
       }
     });
   };
@@ -1903,7 +1919,7 @@ var EventHub, Filter, Tree, addNode, buildTree, db, sortNode, util,
 
 db = sys["import"]('db');
 
-util = sys["import"]('util');
+util = sys["import"]('/util');
 
 Tree = sys["import"]('tree');
 
@@ -2343,28 +2359,6 @@ exports.index = EventHub = (function() {
 
 })();
 });
-moduleManager.module('/views/util', function(exports,sys){
-exports.measureHeight = function(elem) {
-  var height, origHeight, origTransition, style;
-  style = elem.style;
-  origTransition = style.transition;
-  origHeight = style.height;
-  style.transition = 'none !important';
-  style.height = 'auto';
-  height = elem.getBoundingClientRect().height;
-  style.height = origHeight;
-  style.transition = origTransition;
-  return height;
-};
-
-exports.after = function(timeout, fun) {
-  return setTimeout(fun, timeout * 1000);
-};
-
-exports.nextFrame = function(fun) {
-  return requestAnimationFrame(fun);
-};
-});
 moduleManager.module('/views/navigatable', function(exports,sys){
 var Navigatable, instances;
 
@@ -2455,6 +2449,42 @@ exports.index = Bar = (function() {
   return Bar;
 
 })();
+});
+moduleManager.module('/util', function(exports,sys){
+exports.measureHeight = function(elem) {
+  var height, origHeight, origTransition, style;
+  style = elem.style;
+  origTransition = style.transition;
+  origHeight = style.height;
+  style.transition = 'none !important';
+  style.height = 'auto';
+  height = elem.getBoundingClientRect().height;
+  style.height = origHeight;
+  style.transition = origTransition;
+  return height;
+};
+
+exports.after = function(timeout, fun) {
+  return setTimeout(fun, timeout * 1000);
+};
+
+exports.nextFrame = function(fun) {
+  return requestAnimationFrame(fun);
+};
+
+exports.formatNumber = function(n) {
+  if (n < 1e3) {
+    return n.toFixed(0);
+  } else if (n >= 1e3 && n < 1e6) {
+    return (n / 1e3).toFixed(1) + 'k';
+  } else if (n >= 1e6 && n < 1e9) {
+    return (n / 1e6).toFixed(1) + 'M';
+  } else if (n >= 1e9 && n < 1e12) {
+    return (n / 1e9).toFixed(1) + 'G';
+  } else {
+    return (n / 1e12).toFixed(1) + 'T';
+  }
+};
 });
 moduleManager.index();
 })();

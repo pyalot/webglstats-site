@@ -45,12 +45,15 @@ exports.index = class Gauge
         percent = $('<div class="percent">0%</div>').appendTo(@elem)[0]
 
         if label?
-            $('<label></label>')
+            @label = $('<label></label>')
                 .text(label)
                 .appendTo(@elem)
 
         @chart = @elem.data('easyPieChart')
 
+    setLabel: (text) ->
+        if @label?
+            @label.text(text)
 
     update: (value) ->
         if isNaN(value)

@@ -1,4 +1,5 @@
 db = sys.import 'db'
+util = sys.import '/util'
 {Gauge, Series, StackedPercentage} = sys.import '/chart'
 NavlistExpand = sys.import 'navlist'
 
@@ -293,10 +294,11 @@ exports.index = class Extensions
                     query: query
                     success: (result) ->
                         if result.total > 0
-                            result = result.values[1]/result.total
+                            percentage = result.values[1]/result.total
                         else
-                            result = 0
-                        chart.update(result*100)
+                            percentage = 0
+                        chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                        chart.update(percentage*100)
                         chart.elem.removeClass('spinner')
             else
                 @filter.offChange(update)

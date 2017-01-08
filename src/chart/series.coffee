@@ -1,3 +1,5 @@
+util = sys.import '/util'
+
 smooth = (size, src) ->
     values = src[..size]
     for i in [size...src.length]
@@ -41,4 +43,4 @@ exports.index = class Series
                     value = (item.values[1]/item.total)*100
                 else
                     value = 0
-                return "<span>#{item.name} - #{value.toFixed(0)}%</span>"
+                return "<span>#{item.name} - #{value.toFixed(0)}%<br/>(#{util.formatNumber(item.total)} samples)</span>"

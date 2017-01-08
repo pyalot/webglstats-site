@@ -1,5 +1,6 @@
 db = sys.import 'db'
 extensions = sys.import 'extensions'
+util = sys.import '/util'
 Parameters = sys.import 'parameters'
 {Gauge, Series} = sys.import '/chart'
 Navigatable = sys.import 'navigatable'
@@ -113,8 +114,9 @@ exports.index = class Main extends Navigatable
                 db.execute
                     query: query
                     success: (result) ->
-                        result = result.values[1]/result.total
-                        chart.update(result*100)
+                        percentage = result.values[1]/result.total
+                        chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                        chart.update(percentage*100)
                         chart.elem.removeClass('spinner')
             else
                 @filter.offChange update

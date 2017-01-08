@@ -1,5 +1,5 @@
 db = sys.import 'db'
-util = sys.import 'util'
+util = sys.import '/util'
 Tree = sys.import 'tree'
 EventHub = sys.import 'event-hub'
 
