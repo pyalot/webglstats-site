@@ -2197,6 +2197,8 @@ exports.index = Node = (function() {
     }
     if (this.parent != null) {
       return this.parent.updateCheck();
+    } else {
+      return this.checkChange();
     }
   };
 

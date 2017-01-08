@@ -47,6 +47,8 @@ exports.index = class Node
 
         if @parent?
             @parent.updateCheck()
+        else
+            @checkChange()
         
     check: ->
         if @checkbox?
