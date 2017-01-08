@@ -1,8 +1,9 @@
-Navigatable = sys.import 'navigatable'
+behavior = sys.import 'behavior'
 
-exports.index = class NavlistExpand extends Navigatable
+exports.index = class NavlistExpand
     constructor: (id, @prefix, entries) ->
-        super()
+        behavior.activatable @
+        behavior.collapsable @
         @parent = $(id)
         @link = @parent.find('a')
 
@@ -36,6 +37,7 @@ exports.index = class NavlistExpand extends Navigatable
             @expand()
 
     expand: (instant=false) ->
+        behavior.collapse(@)
         @parent.addClass('expanded')
 
         @expanded = true
@@ -61,6 +63,6 @@ exports.index = class NavlistExpand extends Navigatable
             entry.removeClass('active')
 
     activate: (name, instant=false) ->
-        @deactivateAll()
+        behavior.deactivate()
         @entries[name].addClass('active')
         @expand(instant)

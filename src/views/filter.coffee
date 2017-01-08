@@ -1,5 +1,6 @@
 db = sys.import 'db'
 util = sys.import '/util'
+behavior = sys.import 'behavior'
 Tree = sys.import 'tree'
 EventHub = sys.import 'event-hub'
 
@@ -49,6 +50,7 @@ sortNode = (node) ->
 
 exports.index = class Filter
     constructor: (parent) ->
+        behavior.collapsable(@)
         @parent = $(parent)
         @link = @parent.find('a')
         @container = $('<div></div>')
@@ -111,6 +113,7 @@ exports.index = class Filter
             @expand()
 
     expand: (instant=false) ->
+        behavior.collapse(@)
         @parent.addClass('expanded')
 
         @expanded = true
@@ -126,20 +129,21 @@ exports.index = class Filter
             @container.removeClass('notransition')
 
     collapse: (instant=false) ->
-        @expanded = false
-        @height = util.measureHeight(@container[0])
-        @container.addClass('notransition')
-        @container[0].style.height = @height + 'px'
-        @container.removeClass('notransition')
+        if @expanded
+            @expanded = false
+            @height = util.measureHeight(@container[0])
+            @container.addClass('notransition')
+            @container[0].style.height = @height + 'px'
+            @container.removeClass('notransition')
 
-        util.nextFrame =>
-            @parent.removeClass('expanded')
-            if instant
-                @container.addClass('notransition')
-            @container[0].style.height = '0px'
-            if instant
-                @container[0].getBoundingClientRect()
-                @container.removeClass('notransition')
+            util.nextFrame =>
+                @parent.removeClass('expanded')
+                if instant
+                    @container.addClass('notransition')
+                @container[0].style.height = '0px'
+                if instant
+                    @container[0].getBoundingClientRect()
+                    @container.removeClass('notransition')
 
     visitActive: (fun) ->
         @tree.visitActive(fun)

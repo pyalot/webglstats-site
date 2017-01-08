@@ -879,9 +879,7 @@ exports.index = Parameters = (function() {
 })();
 });
 moduleManager.module('/views/main', function(exports,sys){
-var Gauge, Main, Navigatable, Parameters, Series, db, extensions, ref, util,
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var Gauge, Main, Parameters, Series, behavior, db, extensions, ref, util;
 
 db = sys["import"]('db');
 
@@ -889,23 +887,22 @@ extensions = sys["import"]('extensions');
 
 util = sys["import"]('/util');
 
+behavior = sys["import"]('behavior');
+
 Parameters = sys["import"]('parameters');
 
 ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series;
 
-Navigatable = sys["import"]('navigatable');
-
-exports.index = Main = (function(superClass) {
-  extend(Main, superClass);
-
+exports.index = Main = (function() {
   function Main(filter) {
     this.filter = filter;
-    Main.__super__.constructor.call(this);
+    behavior.activatable(this);
   }
 
   Main.prototype.show = function() {
     var col, row, smallCharts, widget;
-    this.deactivateAll();
+    behavior.deactivate();
+    behavior.collapse(this);
     row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
@@ -1030,7 +1027,7 @@ exports.index = Main = (function(superClass) {
 
   return Main;
 
-})(Navigatable);
+})();
 });
 moduleManager.module('/views/db', function(exports,sys){
 var completeRequest, completed, fadeOut, fadeOuttimeout, progress, requested, startRequest, updateProgress, visible;
@@ -1106,21 +1103,18 @@ exports.execute = function(arg) {
 };
 });
 moduleManager.module('/views/navlist', function(exports,sys){
-var Navigatable, NavlistExpand,
-  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-  extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
-  hasProp = {}.hasOwnProperty;
+var NavlistExpand, behavior,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
-Navigatable = sys["import"]('navigatable');
+behavior = sys["import"]('behavior');
 
-exports.index = NavlistExpand = (function(superClass) {
-  extend(NavlistExpand, superClass);
-
+exports.index = NavlistExpand = (function() {
   function NavlistExpand(id, prefix, entries) {
     var entry, i, len;
     this.prefix = prefix;
     this.toggle = bind(this.toggle, this);
-    NavlistExpand.__super__.constructor.call(this);
+    behavior.activatable(this);
+    behavior.collapsable(this);
     this.parent = $(id);
     this.link = this.parent.find('a');
     this.list = $('<ul></ul>').appendTo(this.parent);
@@ -1155,6 +1149,7 @@ exports.index = NavlistExpand = (function(superClass) {
     if (instant == null) {
       instant = false;
     }
+    behavior.collapse(this);
     this.parent.addClass('expanded');
     this.expanded = true;
     if (instant) {
@@ -1198,14 +1193,14 @@ exports.index = NavlistExpand = (function(superClass) {
     if (instant == null) {
       instant = false;
     }
-    this.deactivateAll();
+    behavior.deactivate();
     this.entries[name].addClass('active');
     return this.expand(instant);
   };
 
   return NavlistExpand;
 
-})(Navigatable);
+})();
 });
 moduleManager.module('/views/layout', function(exports,sys){
 
@@ -1914,12 +1909,14 @@ exports.index = Series = (function() {
 })();
 });
 moduleManager.module('/views/filter', function(exports,sys){
-var EventHub, Filter, Tree, addNode, buildTree, db, sortNode, util,
+var EventHub, Filter, Tree, addNode, behavior, buildTree, db, sortNode, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 db = sys["import"]('db');
 
 util = sys["import"]('/util');
+
+behavior = sys["import"]('behavior');
 
 Tree = sys["import"]('tree');
 
@@ -1995,6 +1992,7 @@ exports.index = Filter = (function() {
   function Filter(parent) {
     this.toggle = bind(this.toggle, this);
     this.filterChanged = bind(this.filterChanged, this);
+    behavior.collapsable(this);
     this.parent = $(parent);
     this.link = this.parent.find('a');
     this.container = $('<div></div>').appendTo(this.parent);
@@ -2086,6 +2084,7 @@ exports.index = Filter = (function() {
     if (instant == null) {
       instant = false;
     }
+    behavior.collapse(this);
     this.parent.addClass('expanded');
     this.expanded = true;
     if (instant) {
@@ -2107,24 +2106,26 @@ exports.index = Filter = (function() {
     if (instant == null) {
       instant = false;
     }
-    this.expanded = false;
-    this.height = util.measureHeight(this.container[0]);
-    this.container.addClass('notransition');
-    this.container[0].style.height = this.height + 'px';
-    this.container.removeClass('notransition');
-    return util.nextFrame((function(_this) {
-      return function() {
-        _this.parent.removeClass('expanded');
-        if (instant) {
-          _this.container.addClass('notransition');
-        }
-        _this.container[0].style.height = '0px';
-        if (instant) {
-          _this.container[0].getBoundingClientRect();
-          return _this.container.removeClass('notransition');
-        }
-      };
-    })(this));
+    if (this.expanded) {
+      this.expanded = false;
+      this.height = util.measureHeight(this.container[0]);
+      this.container.addClass('notransition');
+      this.container[0].style.height = this.height + 'px';
+      this.container.removeClass('notransition');
+      return util.nextFrame((function(_this) {
+        return function() {
+          _this.parent.removeClass('expanded');
+          if (instant) {
+            _this.container.addClass('notransition');
+          }
+          _this.container[0].style.height = '0px';
+          if (instant) {
+            _this.container[0].getBoundingClientRect();
+            return _this.container.removeClass('notransition');
+          }
+        };
+      })(this));
+    }
   };
 
   Filter.prototype.visitActive = function(fun) {
@@ -2361,30 +2362,6 @@ exports.index = EventHub = (function() {
 
 })();
 });
-moduleManager.module('/views/navigatable', function(exports,sys){
-var Navigatable, instances;
-
-instances = [];
-
-exports.index = Navigatable = (function() {
-  function Navigatable() {
-    instances.push(this);
-  }
-
-  Navigatable.prototype.deactivateAll = function() {
-    var i, instance, len, results;
-    results = [];
-    for (i = 0, len = instances.length; i < len; i++) {
-      instance = instances[i];
-      results.push(instance.deactivate());
-    }
-    return results;
-  };
-
-  return Navigatable;
-
-})();
-});
 moduleManager.module('/chart/bar', function(exports,sys){
 var Bar, normalize;
 
@@ -2486,6 +2463,45 @@ exports.formatNumber = function(n) {
   } else {
     return (n / 1e12).toFixed(1) + 'T';
   }
+};
+});
+moduleManager.module('/views/behavior', function(exports,sys){
+var activatables, collapsables;
+
+activatables = [];
+
+collapsables = [];
+
+exports.activatable = function(instance) {
+  return activatables.push(instance);
+};
+
+exports.collapsable = function(instance) {
+  return collapsables.push(instance);
+};
+
+exports.collapse = function(origin) {
+  var i, instance, len, results;
+  results = [];
+  for (i = 0, len = collapsables.length; i < len; i++) {
+    instance = collapsables[i];
+    if (origin !== instance) {
+      results.push(instance.collapse());
+    } else {
+      results.push(void 0);
+    }
+  }
+  return results;
+};
+
+exports.deactivate = function() {
+  var i, instance, len, results;
+  results = [];
+  for (i = 0, len = activatables.length; i < len; i++) {
+    instance = activatables[i];
+    results.push(instance.deactivate());
+  }
+  return results;
 };
 });
 moduleManager.index();

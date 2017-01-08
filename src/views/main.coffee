@@ -1,16 +1,17 @@
 db = sys.import 'db'
 extensions = sys.import 'extensions'
 util = sys.import '/util'
+behavior = sys.import 'behavior'
 Parameters = sys.import 'parameters'
 {Gauge, Series} = sys.import '/chart'
-Navigatable = sys.import 'navigatable'
 
-exports.index = class Main extends Navigatable
+exports.index = class Main
     constructor: (@filter) ->
-        super()
+        behavior.activatable @
 
     show: ->
-        @deactivateAll()
+        behavior.deactivate()
+        behavior.collapse(@)
 
         row = $('<div></div>')
             .addClass('row')
