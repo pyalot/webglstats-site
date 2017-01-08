@@ -428,6 +428,7 @@ body {
   background-color: #13171a;
   color: white;
   min-height: 100%;
+  overflow-x: hidden;
 }
 header {
   height: 60px;
