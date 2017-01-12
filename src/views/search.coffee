@@ -49,7 +49,7 @@ exports.index = class Search
 
             $('<p></p>')
                 .appendTo(text)
-                .text(entry.body)
+                .append(entry.body)
 
     add: ({id,titles,body,extra,type,gauge}) ->
         if not (titles instanceof Array)

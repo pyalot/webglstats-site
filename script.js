@@ -2620,7 +2620,7 @@ exports.index = Search = (function() {
       }
       text = $('<div></div>').appendTo(widget);
       link = $('<a></a>').appendTo(text).attr('href', result.ref).text(entry.type + ' ' + entry.title);
-      results1.push($('<p></p>').appendTo(text).text(entry.body));
+      results1.push($('<p></p>').appendTo(text).append(entry.body));
     }
     return results1;
   };
