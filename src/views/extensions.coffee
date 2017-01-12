@@ -7,7 +7,7 @@ info =
     blend_minmax:
         prefix: 'EXT'
         description: '''
-            This extension allows for a blending mode that uses the mimimum or maximum of the incoming and present color.
+            This extension allows for a blending mode that uses the minimum or maximum of the incoming and present color.
             It is useful for medical imaging, volume rendering and general purpose computation on the gpu.
         '''
         spec: '/extensions/EXT_blend_minmax/'
@@ -195,8 +195,27 @@ names = [
 ]
 
 exports.index = class Extensions
-    constructor: (@filter) ->
+    constructor: (@filter, search) ->
         @nav = new NavlistExpand('#extension', 'extension', names)
+
+        @buildSearch(search)
+    
+    buildSearch: (search) ->
+        for name in names
+            do (name) =>
+                meta = info[name]
+                search.add
+                    id: "/webgl/extension/#{name}"
+                    titles: [
+                        meta.prefix + '_' + name
+                        name
+                        name.replace(/_/g, ' ')
+                    ]
+                    body: meta.description
+                    extra: if meta.params? then meta.params.join(' ') else null
+                    type: 'Extension'
+                    gauge: =>
+                        @gauge(name)
 
     show: (name, pageload) ->
         @nav.activate(name, pageload)

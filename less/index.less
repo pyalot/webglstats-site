@@ -51,59 +51,7 @@ body{
     overflow-x: hidden;
 }
 
-header{
-    height: @headerHeight;
-    line-height: @headerHeight;
-    width: 100%;
-    background-color: @light;
-    position: fixed;
-    padding-left: 5px;
-    border-bottom: 1px solid rgba(0,0,0,0.75);
-    z-index: 1;
-
-    img{
-        height: 40px;
-        vertical-align: middle;
-    }
-   
-    .navtoggle{
-        width: 20px;
-        height: 20px;
-        margin-left: 20px;
-        cursor: pointer;
-
-        @media(min-width: 760px){
-            display: none;
-        }
-    }
-
-    @keyframes progressPulse{
-        from{
-            background-color: #2d8fff;
-        }
-        to{
-            background-color: #24ff1b;
-        }
-    }
-
-    .progress{
-        animation-duration: 0.25s;
-        animation-name: progressPulse;
-        animation-iteration-count: infinite;
-        animation-direction: alternate;
-
-        position: absolute;
-        bottom: 0px;
-        right: 0px;
-        width: 100%;
-        height: 3px;
-        //background-color: #2d8fff;
-        background-color: #24ff1b;
-        visibility: visible;
-        transition: width 0.05s;
-        pointer-events: none;
-    }
-}
+@import "header.less";
 
 .spinner{
     animation: jump 0.6s ease 0s infinite normal;
@@ -136,6 +84,7 @@ header{
 @import "nav.less";
 @import "main.less";
 @import "chart.less";
+@import "search.less";
 
 footer{
     color: rgba(255,255,255, 0.25);

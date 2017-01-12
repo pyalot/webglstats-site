@@ -30,3 +30,6 @@ exports.formatNumber = (n) ->
         return (n/1e9).toFixed(1) + 'G'
     else
         return (n/1e12).toFixed(1) + 'T'
+
+exports.parseQs = ->
+    null

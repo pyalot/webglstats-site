@@ -148,7 +148,7 @@ navLists = [];
 Views = sys["import"]('views');
 
 $(function() {
-  var path, views;
+  var path, query, views;
   views = new Views();
   document.addEventListener('click', function(event) {
     var href, ref, target;
@@ -166,17 +166,30 @@ $(function() {
     height: 'auto'
   });
   window.addEventListener('popstate', function() {
-    return views.handle(document.location.pathname);
+    var query;
+    query = new URLSearchParams(document.location.search);
+    return views.handle(document.location.pathname, query);
   });
   path = document.location.pathname;
-  views.handle(path, true);
-  return $('.navtoggle').click(function() {
+  query = new URLSearchParams(document.location.search);
+  views.handle(path, query, true);
+  $('.navtoggle').click(function() {
     return $('body').toggleClass('sidebar');
+  });
+  return $('form.search').submit(function(event) {
+    var term;
+    term = $(this).find('input[type=text]').val();
+    query = "?query=" + term;
+    history.pushState(null, null, "/search" + query);
+    query = new URLSearchParams(query);
+    views.handle('/search', query);
+    event.preventDefault();
+    return event.stopPropagation();
   });
 });
 });
 moduleManager.module('/views/index', function(exports,sys){
-var Extensions, Filter, Main, Parameters, Views, db;
+var Extensions, Filter, Main, Parameters, Search, Views, db;
 
 Parameters = sys["import"]('parameters');
 
@@ -186,18 +199,21 @@ Main = sys["import"]('main');
 
 Filter = sys["import"]('filter');
 
+Search = sys["import"]('search');
+
 db = sys["import"]('db');
 
 exports.index = Views = (function() {
   function Views() {
     db.init();
+    this.search = new Search();
     this.filter = new Filter('#filter');
-    this.main = new Main(this.filter);
-    this.parameters = new Parameters(this.filter);
-    this.extensions = new Extensions(this.filter);
+    this.main = new Main(this.filter, this.search);
+    this.parameters = new Parameters(this.filter, this.search);
+    this.extensions = new Extensions(this.filter, this.search);
   }
 
-  Views.prototype.handle = function(path, pageload) {
+  Views.prototype.handle = function(path, query, pageload) {
     var category, name, parts;
     if (pageload == null) {
       pageload = false;
@@ -206,6 +222,8 @@ exports.index = Views = (function() {
     if (path === '/') {
       this.main.show(pageload);
       return this.extensions.overview(pageload);
+    } else if (path === '/search') {
+      return this.search.show(query, pageload);
     } else {
       path = path.slice(1);
       parts = path.split('/');
@@ -239,7 +257,7 @@ NavlistExpand = sys["import"]('navlist');
 info = {
   blend_minmax: {
     prefix: 'EXT',
-    description: 'This extension allows for a blending mode that uses the mimimum or maximum of the incoming and present color.\nIt is useful for medical imaging, volume rendering and general purpose computation on the gpu.',
+    description: 'This extension allows for a blending mode that uses the minimum or maximum of the incoming and present color.\nIt is useful for medical imaging, volume rendering and general purpose computation on the gpu.',
     spec: '/extensions/EXT_blend_minmax/'
   },
   color_buffer_float: {
@@ -369,10 +387,36 @@ info = {
 names = ['blend_minmax', 'color_buffer_float', 'color_buffer_half_float', 'compressed_texture_astc', 'compressed_texture_atc', 'compressed_texture_etc1', 'compressed_texture_pvrtc', 'compressed_texture_s3tc', 'debug_renderer_info', 'depth_texture', 'disjoint_timer_query', 'draw_buffers', 'element_index_uint', 'frag_depth', 'instanced_arrays', 'lose_context', 'sRGB', 'shader_texture_lod', 'standard_derivatives', 'texture_filter_anisotropic', 'texture_float', 'texture_float_linear', 'texture_half_float', 'texture_half_float_linear', 'vertex_array_object'];
 
 exports.index = Extensions = (function() {
-  function Extensions(filter) {
+  function Extensions(filter, search) {
     this.filter = filter;
     this.nav = new NavlistExpand('#extension', 'extension', names);
+    this.buildSearch(search);
   }
+
+  Extensions.prototype.buildSearch = function(search) {
+    var i, len, name, results;
+    results = [];
+    for (i = 0, len = names.length; i < len; i++) {
+      name = names[i];
+      results.push((function(_this) {
+        return function(name) {
+          var meta;
+          meta = info[name];
+          return search.add({
+            id: "/webgl/extension/" + name,
+            titles: [meta.prefix + '_' + name, name, name.replace(/_/g, ' ')],
+            body: meta.description,
+            extra: meta.params != null ? meta.params.join(' ') : null,
+            type: 'Extension',
+            gauge: function() {
+              return _this.gauge(name);
+            }
+          });
+        };
+      })(this)(name));
+    }
+    return results;
+  };
 
   Extensions.prototype.show = function(name, pageload) {
     var col, i, len, param, ref1, results, row, widget;
@@ -680,10 +724,26 @@ fieldNames = {
 };
 
 exports.index = Parameters = (function() {
-  function Parameters(filter) {
+  function Parameters(filter, search) {
     this.filter = filter;
     this.nav = new NavlistExpand('#parameter', 'parameter', names);
+    this.buildSearch(search);
   }
+
+  Parameters.prototype.buildSearch = function(search) {
+    var i, len, name, results;
+    results = [];
+    for (i = 0, len = names.length; i < len; i++) {
+      name = names[i];
+      results.push(search.add({
+        id: "/webgl/parameter/" + name,
+        titles: [name, name.replace(/_/g, ' ')],
+        body: info[name].description,
+        type: 'Parameter'
+      }));
+    }
+    return results;
+  };
 
   Parameters.prototype.show = function(name, pageload) {
     var col, full, row, widget;
@@ -879,7 +939,8 @@ exports.index = Parameters = (function() {
 })();
 });
 moduleManager.module('/views/main', function(exports,sys){
-var Gauge, Main, Parameters, Series, behavior, db, extensions, ref, util;
+var Gauge, Main, Parameters, Series, behavior, db, extensions, ref, util,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 db = sys["import"]('db');
 
@@ -894,10 +955,26 @@ Parameters = sys["import"]('parameters');
 ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series;
 
 exports.index = Main = (function() {
-  function Main(filter) {
+  function Main(filter, search) {
     this.filter = filter;
+    this.gauge = bind(this.gauge, this);
     behavior.activatable(this);
+    search.add({
+      id: '/',
+      titles: 'WebGL Support',
+      body: this.info($('<div></div>')).text(),
+      type: 'Overview',
+      gauge: this.gauge
+    });
   }
+
+  Main.prototype.info = function(parent) {
+    $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(parent);
+    $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(parent);
+    $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;\n    defer async&gt;&lt;/script&gt;</pre>').appendTo(parent);
+    $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(parent);
+    return parent;
+  };
 
   Main.prototype.show = function() {
     var col, row, smallCharts, widget;
@@ -907,10 +984,7 @@ exports.index = Main = (function() {
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1>WebGL</h1>').appendTo(widget);
-    $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(widget);
-    $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(widget);
-    $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;\n    defer async&gt;&lt;/script&gt;</pre>').appendTo(widget);
-    $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(widget);
+    this.info(widget);
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1>Support (30 days)</h1>').appendTo(widget);
@@ -2464,6 +2538,10 @@ exports.formatNumber = function(n) {
     return (n / 1e12).toFixed(1) + 'T';
   }
 };
+
+exports.parseQs = function() {
+  return null;
+};
 });
 moduleManager.module('/views/behavior', function(exports,sys){
 var activatables, collapsables;
@@ -2503,6 +2581,76 @@ exports.deactivate = function() {
   }
   return results;
 };
+});
+moduleManager.module('/views/search', function(exports,sys){
+var Search, behavior;
+
+behavior = sys["import"]('behavior');
+
+exports.index = Search = (function() {
+  function Search() {
+    this.index = lunr(function() {
+      this.field('title', {
+        boost: 10
+      });
+      this.field('body');
+      this.field('extra');
+      return this.ref('id');
+    });
+    this.entries = {};
+  }
+
+  Search.prototype.show = function(query, instant) {
+    var entry, i, len, link, result, results, results1, text, widget;
+    query = query.get('query');
+    results = this.index.search(query);
+    behavior.deactivate();
+    behavior.collapse();
+    widget = $('<div class="full box"></div>').appendTo('main');
+    $('<span>Search Results for: </span>').appendTo(widget);
+    $('<span class="query"></span>').appendTo(widget).text('"' + query + '". ');
+    $("<span>" + results.length + " results found.</span>").appendTo(widget);
+    results1 = [];
+    for (i = 0, len = results.length; i < len; i++) {
+      result = results[i];
+      entry = this.entries[result.ref];
+      widget = $('<div class="full box search-result"></div>').appendTo('main');
+      if (entry.gauge != null) {
+        entry.gauge().appendTo(widget);
+      }
+      text = $('<div></div>').appendTo(widget);
+      link = $('<a></a>').appendTo(text).attr('href', result.ref).text(entry.type + ' ' + entry.title);
+      results1.push($('<p></p>').appendTo(text).text(entry.body));
+    }
+    return results1;
+  };
+
+  Search.prototype.add = function(arg) {
+    var body, extra, gauge, id, titles, type;
+    id = arg.id, titles = arg.titles, body = arg.body, extra = arg.extra, type = arg.type, gauge = arg.gauge;
+    if (!(titles instanceof Array)) {
+      titles = [titles];
+    }
+    if (extra == null) {
+      extra = null;
+    }
+    this.entries[id] = {
+      title: titles[0],
+      body: body,
+      type: type,
+      gauge: gauge
+    };
+    return this.index.add({
+      id: id,
+      title: titles.join(' '),
+      body: body,
+      extra: extra
+    });
+  };
+
+  return Search;
+
+})();
 });
 moduleManager.index();
 })();

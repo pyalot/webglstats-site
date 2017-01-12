@@ -1,0 +1,66 @@
+form.search{
+    border: 1px solid @medium;
+    background-color: #3e3d3b;
+    border-radius: 14px;
+    margin: 10px;
+    padding: 0;
+    display: flex;
+
+    input{
+        color: white;
+        padding-left: 14px;
+        height: 28px;
+        outline: none;
+        border: none;
+        background: transparent;
+        flex-grow: 1;
+
+        &::-moz-placeholder{
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        &:-ms-input-placeholder{
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+        &::-webkit-input-placeholder{
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+
+        &:placeholder{
+            color: rgba(255,255,255,0.3);
+            font-weight: bold;
+        }
+    }
+    button{
+        flex-grow: 0;
+        flex-shrink: 0;
+        padding: 0;
+        margin: 0;
+        border: none;
+        outline: none;
+        width: 35px;
+        height: 28px;
+        border-radius: 0px 14px 14px 0px;
+        background-color: white;
+        background-image: url("/img/search.svg");
+        background-repeat: no-repeat;
+        opacity: 0.3;
+    }
+}
+
+main > div.search-result{
+    display: flex;
+
+    >.gauge:first-child{
+        flex-grow: 0;
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+
+    a{
+        font-size: 16px;
+        font-weight: bold;
+    }
+}

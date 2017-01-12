@@ -17,11 +17,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
+        <link rel="search" title="WebGL Stats" href="/search">
 
         <link href='//fonts.googleapis.com/css?family=Roboto:400,700' rel='stylesheet' type='text/css'>
         <link href='//fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="/style.css"/>
 
+        <script src="/lib/url-search-params.js"></script>
+        <script src="/lib/lunr.min.js"></script>
         <script src="/lib/jquery.js"></script>
         <script src="/lib/jquery.slimscroll.min.js"></script>
         <script src="/lib/jquery.easypiechart.min.js"></script>
@@ -35,6 +38,12 @@
         </footer>
         <nav>
         <div class="content">
+                <div>
+                    <form class="search" role="search" action="/search" method="GET">
+                        <input name="query" type="text" placeholder="Search..."></input>
+                        <button type="submit"></button>
+                    </form>
+                </div>
                 <div id="filter" class="expandable">
                     <a>
                         Filter<span class="arrow"></span>
@@ -60,25 +69,7 @@
             <img src="/img/hamburger.svg" class="navtoggle">
         </header>
         <main>
-            <div class="row">
-                <div>
-                    <div>
-                        <h1>EXT_blend_minmax</h1>
-                        <p>
-                            This extension allows for a blending mode that uses the mimimum or maximum of the incoming and present color.
-                        </p>
-                        <p>
-                            It is useful for medical imaging, volume rendering and general purpose computation on the gpu.
-                        </p>
-                    </div>
-                </div> 
-                <div>
-                    <div>here</div>
-                </div> 
-            </div>
-            <div class="full">
-
-            </div>
+            <noscript>Page does not work without JS.</noscript>
         </main>
     </body>
 </html>

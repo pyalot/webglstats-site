@@ -16,10 +16,21 @@ $ ->
     $('nav > div.content').slimScroll(height:'auto')
 
     window.addEventListener 'popstate', ->
-        views.handle(document.location.pathname)
+        query = new URLSearchParams(document.location.search)
+        views.handle(document.location.pathname, query)
 
     path = document.location.pathname
-    views.handle(path, true)
+    query = new URLSearchParams(document.location.search)
+    views.handle(path, query, true)
 
     $('.navtoggle').click ->
         $('body').toggleClass('sidebar')
+
+    $('form.search').submit (event) ->
+        term = $(@).find('input[type=text]').val()
+        query = "?query=#{term}"
+        history.pushState(null, null, "/search#{query}")
+        query = new URLSearchParams(query)
+        views.handle('/search', query)
+        event.preventDefault()
+        event.stopPropagation()

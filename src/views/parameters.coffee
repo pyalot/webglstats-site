@@ -104,8 +104,20 @@ fieldNames =
     ALIASED_POINT_SIZE_RANGE: 'ALIASED_POINT_SIZE_RANGE.max'
 
 exports.index = class Parameters
-    constructor: (@filter) ->
+    constructor: (@filter, search) ->
         @nav = new NavlistExpand('#parameter', 'parameter', names)
+        @buildSearch(search)
+
+    buildSearch: (search) ->
+        for name in names
+            search.add
+                id: "/webgl/parameter/#{name}"
+                titles: [
+                    name
+                    name.replace(/_/g, ' ')
+                ]
+                body: info[name].description
+                type: 'Parameter'
 
     show: (name, pageload) ->
         @nav.activate(name, pageload)

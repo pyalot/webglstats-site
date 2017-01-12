@@ -6,8 +6,35 @@ Parameters = sys.import 'parameters'
 {Gauge, Series} = sys.import '/chart'
 
 exports.index = class Main
-    constructor: (@filter) ->
+    constructor: (@filter, search) ->
         behavior.activatable @
+        search.add
+            id: '/'
+            titles: 'WebGL Support'
+            body: @info($('<div></div>')).text()
+            type: 'Overview'
+            gauge: @gauge
+       
+    info: (parent) ->
+        $('''<p>
+            The statistics on this site help WebGL developers make decisions about hardware capabilities. 
+        </p>''').appendTo(parent)
+        
+        $('''<p>
+            If you want help collecting data just embedd the code below into your page.
+        </p>''').appendTo(parent)
+
+        
+        $('''
+            <pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;
+                defer async&gt;&lt;/script&gt;</pre>''')
+            .appendTo(parent)
+        
+        $('''<p>
+            You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.
+        </p>''').appendTo(parent)
+
+        return parent
 
     show: ->
         behavior.deactivate()
@@ -27,22 +54,7 @@ exports.index = class Main
         $('<h1>WebGL</h1>')
             .appendTo(widget)
 
-        $('''<p>
-            The statistics on this site help WebGL developers make decisions about hardware capabilities. 
-        </p>''').appendTo(widget)
-        
-        $('''<p>
-            If you want help collecting data just embedd the code below into your page.
-        </p>''').appendTo(widget)
-        
-        $('''
-            <pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;
-                defer async&gt;&lt;/script&gt;</pre>''')
-            .appendTo(widget)
-        
-        $('''<p>
-            You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.
-        </p>''').appendTo(widget)
+        @info widget
 
         col = $('<div></div>')
             .appendTo(row)
@@ -91,7 +103,7 @@ exports.index = class Main
 
         @series().appendTo(widget)
 
-    gauge: (size='small', label=null, device=null) ->
+    gauge: (size='small', label=null, device=null) =>
         chart = new Gauge(label:label, size:size)
 
         query =

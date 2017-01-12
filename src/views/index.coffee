@@ -2,23 +2,28 @@ Parameters = sys.import 'parameters'
 Extensions = sys.import 'extensions'
 Main = sys.import 'main'
 Filter = sys.import 'filter'
+Search = sys.import 'search'
 db = sys.import 'db'
 
 exports.index = class Views
     constructor: ->
         db.init()
-        @filter = new Filter('#filter')
-        @main = new Main(@filter)
-        @parameters = new Parameters(@filter)
-        @extensions = new Extensions(@filter)
 
-    handle: (path, pageload=false) ->
+        @search = new Search()
+        @filter = new Filter('#filter')
+        @main = new Main(@filter, @search)
+        @parameters = new Parameters(@filter, @search)
+        @extensions = new Extensions(@filter, @search)
+
+    handle: (path, query, pageload=false) ->
         $('main').empty()
 
         if path == '/'
             @main.show(pageload)
             @extensions.overview(pageload)
             #@parameters.overview(pageload) #these charts are not really informative
+        else if path == '/search'
+            @search.show(query, pageload)
         else
             path = path[1...]
             parts = path.split('/')

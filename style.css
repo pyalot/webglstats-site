@@ -478,6 +478,9 @@ header .progress {
   transition: width 0.05s;
   pointer-events: none;
 }
+header form {
+  display: inline-block;
+}
 .spinner {
   animation: jump 0.6s ease 0s infinite normal;
 }
@@ -822,6 +825,66 @@ table.data-table td.bar div {
 table.data-table thead td {
   font-weight: bold;
   text-align: center;
+}
+form.search {
+  border: 1px solid #2b333a;
+  background-color: #3e3d3b;
+  border-radius: 14px;
+  margin: 10px;
+  padding: 0;
+  display: flex;
+}
+form.search input {
+  color: white;
+  padding-left: 14px;
+  height: 28px;
+  outline: none;
+  border: none;
+  background: transparent;
+  flex-grow: 1;
+}
+form.search input::-moz-placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+form.search input:-ms-input-placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+form.search input::-webkit-input-placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+form.search input:placeholder {
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: bold;
+}
+form.search button {
+  flex-grow: 0;
+  flex-shrink: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  width: 35px;
+  height: 28px;
+  border-radius: 0px 14px 14px 0px;
+  background-color: white;
+  background-image: url("/img/search.svg");
+  background-repeat: no-repeat;
+  opacity: 0.3;
+}
+main > div.search-result {
+  display: flex;
+}
+main > div.search-result > .gauge:first-child {
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+main > div.search-result a {
+  font-size: 16px;
+  font-weight: bold;
 }
 footer {
   color: rgba(255, 255, 255, 0.25);
