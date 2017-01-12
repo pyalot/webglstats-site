@@ -2643,7 +2643,7 @@ exports.index = Search = (function() {
     return this.index.add({
       id: id,
       title: titles.join(' '),
-      body: body,
+      body: $('<div></div>').append(body).text(),
       extra: extra
     });
   };

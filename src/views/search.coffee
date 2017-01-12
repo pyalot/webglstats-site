@@ -63,4 +63,4 @@ exports.index = class Search
             type: type
             gauge: gauge
 
-        @index.add(id:id, title:titles.join(' '), body:body,extra:extra)
+        @index.add(id:id, title:titles.join(' '), body:$('<div></div>').append(body).text(),extra:extra)
