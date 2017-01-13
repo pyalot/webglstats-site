@@ -2,7 +2,6 @@ db = sys.import 'db'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
 Tree = sys.import 'tree'
-EventHub = sys.import 'event-hub'
 
 addNode = (parent, parts, count, key) ->
     parent.count += count
@@ -62,8 +61,6 @@ exports.index = class Filter
         @link.on 'click', @toggle
         @expanded = false
 
-        @changeHandlers = new EventHub()
-
         @tree = new Tree container:@container, checkChange:@filterChanged, name:'All'
     
         db.execute
@@ -80,11 +77,11 @@ exports.index = class Filter
 
         @platforms = null
 
-    onChange: (fun) ->
-        @changeHandlers.bind(fun)
+        @listeners = []
 
-    offChange: (fun) ->
-        @changeHandlers.unbind(fun)
+    onChange: (elem, listener) ->
+        @listeners.push(elem:elem, change:listener)
+        listener()
 
     filterChanged: =>
         if @tree.status == 'checked'
@@ -95,7 +92,13 @@ exports.index = class Filter
                 if node.key?
                     values.push(node.key)
             @platforms = values
-        @changeHandlers.trigger(values)
+
+        listeners = []
+        for listener in @listeners
+            if document.body.contains(listener.elem[0])
+                listener.change(false)
+                listeners.push(listener)
+        @listeners = listeners
 
     addNode: (parentNode, dataParent, dataChild, depth=0) ->
         name = dataChild.name + ' ' + Math.round(dataChild.count*100/dataParent.count).toFixed(0) + '%'

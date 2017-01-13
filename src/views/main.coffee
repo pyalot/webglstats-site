@@ -114,54 +114,39 @@ exports.index = class Main
         if device?
             query.filterBy['useragent.device'] = device
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                chart.elem.addClass('spinner')
-                initial = false
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
-                else
-                    delete query.filterBy.platform
-
-                db.execute
-                    query: query
-                    success: (result) ->
-                        percentage = result.values[1]/result.total
-                        chart.setLabel(label + " (#{util.formatNumber(result.total)})")
-                        chart.update(percentage*100)
-                        chart.elem.removeClass('spinner')
+        @filter.onChange chart.elem, =>
+            chart.elem.addClass('spinner')
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
             else
-                @filter.offChange update
-        @filter.onChange update
-        update()
+                delete query.filterBy.platform
+
+            db.execute
+                query: query
+                success: (result) ->
+                    percentage = result.values[1]/result.total
+                    chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                    chart.update(percentage*100)
+                    chart.elem.removeClass('spinner')
 
         return chart.elem
 
     series: ->
         chart = new Series()
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    bucketBy:'webgl'
-                    series: 'daily'
+        @filter.onChange chart.elem, =>
+            query =
+                bucketBy:'webgl'
+                series: 'daily'
 
-                if @filter.platforms?
-                    query.filterBy =
-                        platform: @filter.platforms
+            if @filter.platforms?
+                query.filterBy =
+                    platform: @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        chart.update(result.values)
-            else
-                @filter.offChange update
-
-        @filter.onChange update
-        update()
+            db.execute
+                query: query
+                success: (result) ->
+                    chart.update(result.values)
 
         return chart.elem
 

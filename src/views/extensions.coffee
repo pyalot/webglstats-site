@@ -292,37 +292,30 @@ exports.index = class Extensions
         
         fieldName = "webgl.extensions.#{info[name].prefix}_#{name}"
 
-        initial = true
-        update = =>
+        @filter.onChange chart.elem, =>
             chart.elem.addClass('spinner')
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    filterBy:
-                        webgl:true
-                    bucketBy:fieldName
-                    start: -30
+            query =
+                filterBy:
+                    webgl:true
+                bucketBy:fieldName
+                start: -30
 
-                if device?
-                    query.filterBy['useragent.device'] = device
+            if device?
+                query.filterBy['useragent.device'] = device
 
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        if result.total > 0
-                            percentage = result.values[1]/result.total
-                        else
-                            percentage = 0
-                        chart.setLabel(label + " (#{util.formatNumber(result.total)})")
-                        chart.update(percentage*100)
-                        chart.elem.removeClass('spinner')
-            else
-                @filter.offChange(update)
-        @filter.onChange(update)
-        update()
+            db.execute
+                query: query
+                success: (result) ->
+                    if result.total > 0
+                        percentage = result.values[1]/result.total
+                    else
+                        percentage = 0
+                    chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                    chart.update(percentage*100)
+                    chart.elem.removeClass('spinner')
         
         return chart.elem
 
@@ -331,28 +324,20 @@ exports.index = class Extensions
         
         chart = new Series()
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    filterBy:
-                        webgl:true
-                    bucketBy:fieldName
-                    series: 'daily'
+        @filter.onChange chart.elem, =>
+            query =
+                filterBy:
+                    webgl:true
+                bucketBy:fieldName
+                series: 'daily'
 
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        chart.update(result.values)
-            else
-                @filter.offChange(update)
-
-        @filter.onChange(update)
-        update()
+            db.execute
+                query: query
+                success: (result) ->
+                    chart.update(result.values)
 
         return chart.elem
 
@@ -361,53 +346,46 @@ exports.index = class Extensions
         fieldname = "#{extname}.#{param}"
         chart = new StackedPercentage()
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    filterBy:
-                        webgl:true
-                        "#{extname}":true
-                    bucketBy:fieldname
-                    series: 'daily'
+        @filter.onChange chart.elem, =>
+            query =
+                filterBy:
+                    webgl:true
+                    "#{extname}":true
+                bucketBy:fieldname
+                series: 'daily'
 
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        keys = result.keys
-                        xLabels = []
-                        data = []
-                        
-                        if keys[0] == null
-                            valueStart = 1
-                            keys.shift()
-                        else
-                            valueStart = 0
+            db.execute
+                query: query
+                success: (result) ->
+                    keys = result.keys
+                    xLabels = []
+                    data = []
+                    
+                    if keys[0] == null
+                        valueStart = 1
+                        keys.shift()
+                    else
+                        valueStart = 0
 
-                        for item in result.values
-                            xLabels.push(item.name)
-                            values = []
+                    for item in result.values
+                        xLabels.push(item.name)
+                        values = []
 
-                            for value in item.values[valueStart...]
-                                if item.total == 0
-                                    values.push(0)
-                                else
-                                    values.push(value/item.total)
+                        for value in item.values[valueStart...]
+                            if item.total == 0
+                                values.push(0)
+                            else
+                                values.push(value/item.total)
 
-                            data.push(values)
+                        data.push(values)
 
-                        chart.update
-                            areaLabels: keys
-                            xLabels: xLabels
-                            data: data
-            else
-                @filter.offChange(update)
-        update()
-        @filter.onChange(update)
+                    chart.update
+                        areaLabels: keys
+                        xLabels: xLabels
+                        data: data
 
         return $(chart.elem)
 

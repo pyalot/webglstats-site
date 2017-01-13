@@ -826,6 +826,19 @@ table.data-table thead td {
   font-weight: bold;
   text-align: center;
 }
+div.donut {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+div.donut > canvas {
+  margin-right: 20px;
+}
+div.donut > div > div {
+  border-left: 10px solid;
+  padding-left: 5px;
+  margin-bottom: 5px;
+}
 form.search {
   border: 1px solid #2b333a;
   background-color: #3e3d3b;

@@ -45,7 +45,7 @@ class Table
     constructor: (parent) ->
         @table = $('<table class="data-table"></table>')
             .appendTo(parent)
-        thead = $('<thead><tr><td/><td>Value</td><td>%</td><td>Cum.</td></thead>')
+        thead = $('<thead><tr><td/><td>Value</td><td colspan="2">%</td></thead>')
             .appendTo(@table)
         @tbody = $('<tbody></tbody>')
             .appendTo(@table)
@@ -110,14 +110,15 @@ class Chart
             for item in areas[i]
                 max = Math.max(max, item.rel)
 
-            if max > 0.25/100
+            if max > 1.0/100
                 resultLabels.push areaLabels[i]
                 resultAreas.push areas[i]
 
         #return [areaLabels, areas]
         return [resultLabels, resultAreas]
 
-    update: ({areaLabels, @xLabels, data}) ->
+    update: ({areaLabels, @xLabels, data, @type}) ->
+        @type ?= 'abs'
         width = @canvas.width
         height = @canvas.height
         ctx = @ctx
@@ -287,9 +288,14 @@ class Chart
         @drawXAxisYears()
 
     getSlice: (f) ->
-        i = Math.round(f*(@count-1))
-        for area in @areas
-            area[i].abs
+        if @type == 'abs'
+            i = Math.round(f*(@count-1))
+            for area in @areas
+                {abs: area[i].abs, display: area[i].abs}
+        else if @type == 'rel'
+            i = Math.round(f*(@count-1))
+            for area in @areas
+                {abs: area[i].abs, display: area[i].rel}
 
 class Overlay
     constructor: (parent, @chart, @table) ->
@@ -357,7 +363,7 @@ class Overlay
             for value, n in slice
                 [r,g,b] = colorStops[n%colorStops.length]
                 color = "rgb(#{r},#{g},#{b})"
-                y = chartTop + (1-value)*height
+                y = chartTop + (1-value.abs)*height
                 
                 #@table.rows[n].percent.textContent = (value*100).toFixed(1)
                 #@table.rows[n].bar.css('width', value*100)
@@ -379,8 +385,8 @@ class Overlay
     updateTable: (f) ->
         slice = @chart.getSlice(f)
         for value, n in slice
-            @table.rows[n].percent.textContent = (value*100).toFixed(1)
-            @table.rows[n].bar.css('width', value*100)
+            @table.rows[n].percent.textContent = (value.display*100).toFixed(1)
+            @table.rows[n].bar.css('width', value.display*100)
 
 
     drawLabels: (slice, x, chartTop, height) ->
@@ -390,9 +396,9 @@ class Overlay
 
         labels = []
         for value, i in slice
-            y = chartTop + (1-value)*height
+            y = chartTop + (1-value.abs)*height
             label = @chart.areaLabels[i] + ' ='
-            percent = (value*100).toFixed(1) + '%'
+            percent = (value.display*100).toFixed(1) + '%'
             [r,g,b] = colorStops[i%colorStops.length]
             r = Math.round(r*0.75+255*0.25)
             g = Math.round(g*0.75+255*0.25)
@@ -497,5 +503,5 @@ exports.index = class StackedPercentage
 
     update: (params) ->
         @chart.update(params)
-        @table.fill(@chart.areaLabels)
+        @table.fill(@chart.areaLabels, params)
         @overlay.updateTable(1)

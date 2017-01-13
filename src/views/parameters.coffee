@@ -181,52 +181,45 @@ exports.index = class Parameters
 
         chart = new StackedPercentage()
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    filterBy:
-                        webgl:true
-                    bucketBy:fieldName
-                    series: 'daily'
+        @filter.onChange chart.elem, =>
+            query =
+                filterBy:
+                    webgl:true
+                bucketBy:fieldName
+                series: 'daily'
 
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        keys = result.keys
-                        xLabels = []
-                        data = []
-                        
-                        if keys[0] == null
-                            valueStart = 1
-                            keys.shift()
-                        else
-                            valueStart = 0
+            db.execute
+                query: query
+                success: (result) ->
+                    keys = result.keys
+                    xLabels = []
+                    data = []
+                    
+                    if keys[0] == null
+                        valueStart = 1
+                        keys.shift()
+                    else
+                        valueStart = 0
 
-                        for item in result.values
-                            xLabels.push(item.name)
-                            values = []
+                    for item in result.values
+                        xLabels.push(item.name)
+                        values = []
 
-                            for value in item.values[valueStart...]
-                                if item.total == 0
-                                    values.push(0)
-                                else
-                                    values.push(value/item.total)
+                        for value in item.values[valueStart...]
+                            if item.total == 0
+                                values.push(0)
+                            else
+                                values.push(value/item.total)
 
-                            data.push(values)
+                        data.push(values)
 
-                        chart.update
-                            areaLabels: keys
-                            xLabels: xLabels
-                            data: data
-            else
-                @filter.offChange(update)
-        update()
-        @filter.onChange(update)
+                    chart.update
+                        areaLabels: keys
+                        xLabels: xLabels
+                        data: data
 
         return $(chart.elem)
 
@@ -238,32 +231,25 @@ exports.index = class Parameters
                 
         chart = new Bar()
 
-        initial = true
-        update = =>
-            if document.body.contains(chart.elem[0]) or initial
-                initial = false
-                query =
-                    filterBy:
-                        webgl:true
-                    bucketBy:fieldName
-                    start: -30
+        @filter.onChange chart.elem, =>
+            query =
+                filterBy:
+                    webgl:true
+                bucketBy:fieldName
+                start: -30
 
-                if @filter.platforms?
-                    query.filterBy.platform = @filter.platforms
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
 
-                db.execute
-                    query: query
-                    success: (result) ->
-                        values = result.values
-                        keys = result.keys
-                        if not keys[0]?
-                            values.shift()
-                            keys.shift()
-                        chart.update(keys, values)
-            else
-                @filter.offChange(update)
-        @filter.onChange(update)
-        update()
+            db.execute
+                query: query
+                success: (result) ->
+                    values = result.values
+                    keys = result.keys
+                    if not keys[0]?
+                        values.shift()
+                        keys.shift()
+                    chart.update(keys, values)
 
         return chart.elem
 

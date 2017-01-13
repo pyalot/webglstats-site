@@ -31,5 +31,6 @@ exports.formatNumber = (n) ->
     else
         return (n/1e12).toFixed(1) + 'T'
 
-exports.parseQs = ->
-    null
+exports.capitalize = (s) ->
+    return s[0].toUpperCase() + s[1...]
+

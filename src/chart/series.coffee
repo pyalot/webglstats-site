@@ -15,11 +15,15 @@ exports.index = class Series
         @elem = $('<div class="series"></div>')
 
     update: (items) ->
-        values = for item in items
-            if item.total > 0
-                item.values[1]/item.total
-            else
-                0
+        if items[0].values?
+            values = for item in items
+                if item.total > 0
+                    item.values[1]/item.total
+                else
+                    0
+        else
+            values = for item in items
+                item.value
 
         #values = smooth(30, values)
 
@@ -39,8 +43,11 @@ exports.index = class Series
             tooltipFormatter: (sparkline, options, fields) ->
                 x = fields.x
                 item = items[x]
-                if item.total > 0
-                    value = (item.values[1]/item.total)*100
+                if item.total?
+                    if item.total > 0
+                        value = (item.values[1]/item.total)*100
+                    else
+                        value = 0
+                    return "<span>#{item.name} - #{value.toFixed(0)}%<br/>(#{util.formatNumber(item.total)} samples)</span>"
                 else
-                    value = 0
-                return "<span>#{item.name} - #{value.toFixed(0)}%<br/>(#{util.formatNumber(item.total)} samples)</span>"
+                    return "<span>#{item.name} - #{util.formatNumber(item.value)}</span>"

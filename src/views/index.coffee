@@ -1,6 +1,7 @@
 Parameters = sys.import 'parameters'
 Extensions = sys.import 'extensions'
 Main = sys.import 'main'
+Traffic = sys.import 'traffic'
 Filter = sys.import 'filter'
 Search = sys.import 'search'
 db = sys.import 'db'
@@ -14,6 +15,7 @@ exports.index = class Views
         @main = new Main(@filter, @search)
         @parameters = new Parameters(@filter, @search)
         @extensions = new Extensions(@filter, @search)
+        @traffic = new Traffic(@filter, @search)
 
     handle: (path, query, pageload=false) ->
         $('main').empty()
@@ -24,6 +26,8 @@ exports.index = class Views
             #@parameters.overview(pageload) #these charts are not really informative
         else if path == '/search'
             @search.show(query, pageload)
+        else if path == '/traffic'
+            @traffic.show()
         else
             path = path[1...]
             parts = path.split('/')

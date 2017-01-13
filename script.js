@@ -189,13 +189,15 @@ $(function() {
 });
 });
 moduleManager.module('/views/index', function(exports,sys){
-var Extensions, Filter, Main, Parameters, Search, Views, db;
+var Extensions, Filter, Main, Parameters, Search, Traffic, Views, db;
 
 Parameters = sys["import"]('parameters');
 
 Extensions = sys["import"]('extensions');
 
 Main = sys["import"]('main');
+
+Traffic = sys["import"]('traffic');
 
 Filter = sys["import"]('filter');
 
@@ -211,6 +213,7 @@ exports.index = Views = (function() {
     this.main = new Main(this.filter, this.search);
     this.parameters = new Parameters(this.filter, this.search);
     this.extensions = new Extensions(this.filter, this.search);
+    this.traffic = new Traffic(this.filter, this.search);
   }
 
   Views.prototype.handle = function(path, query, pageload) {
@@ -224,6 +227,8 @@ exports.index = Views = (function() {
       return this.extensions.overview(pageload);
     } else if (path === '/search') {
       return this.search.show(query, pageload);
+    } else if (path === '/traffic') {
+      return this.traffic.show();
     } else {
       path = path.slice(1);
       parts = path.split('/');
@@ -460,7 +465,7 @@ exports.index = Extensions = (function() {
   };
 
   Extensions.prototype.gauge = function(name, size, label, device) {
-    var chart, fieldName, initial, update;
+    var chart, fieldName;
     if (size == null) {
       size = 'small';
     }
@@ -475,154 +480,130 @@ exports.index = Extensions = (function() {
       size: size
     });
     fieldName = "webgl.extensions." + info[name].prefix + "_" + name;
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var query;
         chart.elem.addClass('spinner');
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            filterBy: {
-              webgl: true
-            },
-            bucketBy: fieldName,
-            start: -30
-          };
-          if (device != null) {
-            query.filterBy['useragent.device'] = device;
-          }
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              var percentage;
-              if (result.total > 0) {
-                percentage = result.values[1] / result.total;
-              } else {
-                percentage = 0;
-              }
-              chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
-              chart.update(percentage * 100);
-              return chart.elem.removeClass('spinner');
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          start: -30
+        };
+        if (device != null) {
+          query.filterBy['useragent.device'] = device;
         }
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var percentage;
+            if (result.total > 0) {
+              percentage = result.values[1] / result.total;
+            } else {
+              percentage = 0;
+            }
+            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+            chart.update(percentage * 100);
+            return chart.elem.removeClass('spinner');
+          }
+        });
       };
-    })(this);
-    this.filter.onChange(update);
-    update();
+    })(this));
     return chart.elem;
   };
 
   Extensions.prototype.series = function(name) {
-    var chart, fieldName, initial, update;
+    var chart, fieldName;
     fieldName = "webgl.extensions." + info[name].prefix + "_" + name;
     chart = new Series();
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var query;
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            filterBy: {
-              webgl: true
-            },
-            bucketBy: fieldName,
-            series: 'daily'
-          };
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              return chart.update(result.values);
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            return chart.update(result.values);
+          }
+        });
       };
-    })(this);
-    this.filter.onChange(update);
-    update();
+    })(this));
     return chart.elem;
   };
 
   Extensions.prototype.stackedPercentage = function(name, param) {
-    var chart, extname, fieldname, initial, update;
+    var chart, extname, fieldname;
     extname = "webgl.extensions." + info[name].prefix + "_" + name;
     fieldname = extname + "." + param;
     chart = new StackedPercentage();
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var obj, query;
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            filterBy: (
-              obj = {
-                webgl: true
-              },
-              obj["" + extname] = true,
-              obj
-            ),
-            bucketBy: fieldname,
-            series: 'daily'
-          };
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
-              keys = result.keys;
-              xLabels = [];
-              data = [];
-              if (keys[0] === null) {
-                valueStart = 1;
-                keys.shift();
-              } else {
-                valueStart = 0;
-              }
-              ref1 = result.values;
-              for (i = 0, len = ref1.length; i < len; i++) {
-                item = ref1[i];
-                xLabels.push(item.name);
-                values = [];
-                ref2 = item.values.slice(valueStart);
-                for (j = 0, len1 = ref2.length; j < len1; j++) {
-                  value = ref2[j];
-                  if (item.total === 0) {
-                    values.push(0);
-                  } else {
-                    values.push(value / item.total);
-                  }
-                }
-                data.push(values);
-              }
-              return chart.update({
-                areaLabels: keys,
-                xLabels: xLabels,
-                data: data
-              });
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
+        query = {
+          filterBy: (
+            obj = {
+              webgl: true
+            },
+            obj["" + extname] = true,
+            obj
+          ),
+          bucketBy: fieldname,
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
+            keys = result.keys;
+            xLabels = [];
+            data = [];
+            if (keys[0] === null) {
+              valueStart = 1;
+              keys.shift();
+            } else {
+              valueStart = 0;
+            }
+            ref1 = result.values;
+            for (i = 0, len = ref1.length; i < len; i++) {
+              item = ref1[i];
+              xLabels.push(item.name);
+              values = [];
+              ref2 = item.values.slice(valueStart);
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                value = ref2[j];
+                if (item.total === 0) {
+                  values.push(0);
+                } else {
+                  values.push(value / item.total);
+                }
+              }
+              data.push(values);
+            }
+            return chart.update({
+              areaLabels: keys,
+              xLabels: xLabels,
+              data: data
+            });
+          }
+        });
       };
-    })(this);
-    update();
-    this.filter.onChange(update);
+    })(this));
     return $(chart.elem);
   };
 
@@ -776,119 +757,103 @@ exports.index = Parameters = (function() {
   };
 
   Parameters.prototype.series = function(name) {
-    var chart, fieldName, initial, update;
+    var chart, fieldName;
     if (fieldNames[name] != null) {
       fieldName = "webgl.params." + fieldNames[name];
     } else {
       fieldName = "webgl.params." + name;
     }
     chart = new StackedPercentage();
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var query;
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            filterBy: {
-              webgl: true
-            },
-            bucketBy: fieldName,
-            series: 'daily'
-          };
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
-              keys = result.keys;
-              xLabels = [];
-              data = [];
-              if (keys[0] === null) {
-                valueStart = 1;
-                keys.shift();
-              } else {
-                valueStart = 0;
-              }
-              ref1 = result.values;
-              for (i = 0, len = ref1.length; i < len; i++) {
-                item = ref1[i];
-                xLabels.push(item.name);
-                values = [];
-                ref2 = item.values.slice(valueStart);
-                for (j = 0, len1 = ref2.length; j < len1; j++) {
-                  value = ref2[j];
-                  if (item.total === 0) {
-                    values.push(0);
-                  } else {
-                    values.push(value / item.total);
-                  }
-                }
-                data.push(values);
-              }
-              return chart.update({
-                areaLabels: keys,
-                xLabels: xLabels,
-                data: data
-              });
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
+            keys = result.keys;
+            xLabels = [];
+            data = [];
+            if (keys[0] === null) {
+              valueStart = 1;
+              keys.shift();
+            } else {
+              valueStart = 0;
+            }
+            ref1 = result.values;
+            for (i = 0, len = ref1.length; i < len; i++) {
+              item = ref1[i];
+              xLabels.push(item.name);
+              values = [];
+              ref2 = item.values.slice(valueStart);
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                value = ref2[j];
+                if (item.total === 0) {
+                  values.push(0);
+                } else {
+                  values.push(value / item.total);
+                }
+              }
+              data.push(values);
+            }
+            return chart.update({
+              areaLabels: keys,
+              xLabels: xLabels,
+              data: data
+            });
+          }
+        });
       };
-    })(this);
-    update();
-    this.filter.onChange(update);
+    })(this));
     return $(chart.elem);
   };
 
   Parameters.prototype.barchart = function(name) {
-    var chart, fieldName, initial, update;
+    var chart, fieldName;
     if (fieldNames[name] != null) {
       fieldName = "webgl.params." + fieldNames[name];
     } else {
       fieldName = "webgl.params." + name;
     }
     chart = new Bar();
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var query;
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            filterBy: {
-              webgl: true
-            },
-            bucketBy: fieldName,
-            start: -30
-          };
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              var keys, values;
-              values = result.values;
-              keys = result.keys;
-              if (keys[0] == null) {
-                values.shift();
-                keys.shift();
-              }
-              return chart.update(keys, values);
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          start: -30
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var keys, values;
+            values = result.values;
+            keys = result.keys;
+            if (keys[0] == null) {
+              values.shift();
+              keys.shift();
+            }
+            return chart.update(keys, values);
+          }
+        });
       };
-    })(this);
-    this.filter.onChange(update);
-    update();
+    })(this));
     return chart.elem;
   };
 
@@ -1008,7 +973,7 @@ exports.index = Main = (function() {
   };
 
   Main.prototype.gauge = function(size, label, device) {
-    var chart, initial, query, update;
+    var chart, query;
     if (size == null) {
       size = 'small';
     }
@@ -1030,68 +995,52 @@ exports.index = Main = (function() {
     if (device != null) {
       query.filterBy['useragent.device'] = device;
     }
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
-        if (document.body.contains(chart.elem[0]) || initial) {
-          chart.elem.addClass('spinner');
-          initial = false;
-          if (_this.filter.platforms != null) {
-            query.filterBy.platform = _this.filter.platforms;
-          } else {
-            delete query.filterBy.platform;
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              var percentage;
-              percentage = result.values[1] / result.total;
-              chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
-              chart.update(percentage * 100);
-              return chart.elem.removeClass('spinner');
-            }
-          });
+        chart.elem.addClass('spinner');
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
         } else {
-          return _this.filter.offChange(update);
+          delete query.filterBy.platform;
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var percentage;
+            percentage = result.values[1] / result.total;
+            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+            chart.update(percentage * 100);
+            return chart.elem.removeClass('spinner');
+          }
+        });
       };
-    })(this);
-    this.filter.onChange(update);
-    update();
+    })(this));
     return chart.elem;
   };
 
   Main.prototype.series = function() {
-    var chart, initial, update;
+    var chart;
     chart = new Series();
-    initial = true;
-    update = (function(_this) {
+    this.filter.onChange(chart.elem, (function(_this) {
       return function() {
         var query;
-        if (document.body.contains(chart.elem[0]) || initial) {
-          initial = false;
-          query = {
-            bucketBy: 'webgl',
-            series: 'daily'
+        query = {
+          bucketBy: 'webgl',
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy = {
+            platform: _this.filter.platforms
           };
-          if (_this.filter.platforms != null) {
-            query.filterBy = {
-              platform: _this.filter.platforms
-            };
-          }
-          return db.execute({
-            query: query,
-            success: function(result) {
-              return chart.update(result.values);
-            }
-          });
-        } else {
-          return _this.filter.offChange(update);
         }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            return chart.update(result.values);
+          }
+        });
       };
-    })(this);
-    this.filter.onChange(update);
-    update();
+    })(this));
     return chart.elem;
   };
 
@@ -1287,6 +1236,8 @@ exports.Gauge = sys["import"]('gauge');
 exports.Series = sys["import"]('series');
 
 exports.Bar = sys["import"]('bar');
+
+exports.Donut = sys["import"]('donut');
 });
 moduleManager.module('/chart/stacked-percentage', function(exports,sys){
 
@@ -1329,7 +1280,7 @@ Table = (function() {
   function Table(parent) {
     var thead;
     this.table = $('<table class="data-table"></table>').appendTo(parent);
-    thead = $('<thead><tr><td/><td>Value</td><td>%</td><td>Cum.</td></thead>').appendTo(this.table);
+    thead = $('<thead><tr><td/><td>Value</td><td colspan="2">%</td></thead>').appendTo(this.table);
     this.tbody = $('<tbody></tbody>').appendTo(this.table);
   }
 
@@ -1397,7 +1348,7 @@ Chart = (function() {
         item = ref1[k];
         max = Math.max(max, item.rel);
       }
-      if (max > 0.25 / 100) {
+      if (max > 1.0 / 100) {
         resultLabels.push(areaLabels[i]);
         resultAreas.push(areas[i]);
       }
@@ -1407,7 +1358,10 @@ Chart = (function() {
 
   Chart.prototype.update = function(arg) {
     var areaLabels, areas, ctx, data, height, i, item, j, k, len, len1, len2, m, o, ref, ref1, series, stacked, sum, value, values, width;
-    areaLabels = arg.areaLabels, this.xLabels = arg.xLabels, data = arg.data;
+    areaLabels = arg.areaLabels, this.xLabels = arg.xLabels, data = arg.data, this.type = arg.type;
+    if (this.type == null) {
+      this.type = 'abs';
+    }
     width = this.canvas.width;
     height = this.canvas.height;
     ctx = this.ctx;
@@ -1610,15 +1564,32 @@ Chart = (function() {
   };
 
   Chart.prototype.getSlice = function(f) {
-    var area, i, j, len, ref, results;
-    i = Math.round(f * (this.count - 1));
-    ref = this.areas;
-    results = [];
-    for (j = 0, len = ref.length; j < len; j++) {
-      area = ref[j];
-      results.push(area[i].abs);
+    var area, i, j, k, len, len1, ref, ref1, results, results1;
+    if (this.type === 'abs') {
+      i = Math.round(f * (this.count - 1));
+      ref = this.areas;
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        area = ref[j];
+        results.push({
+          abs: area[i].abs,
+          display: area[i].abs
+        });
+      }
+      return results;
+    } else if (this.type === 'rel') {
+      i = Math.round(f * (this.count - 1));
+      ref1 = this.areas;
+      results1 = [];
+      for (k = 0, len1 = ref1.length; k < len1; k++) {
+        area = ref1[k];
+        results1.push({
+          abs: area[i].abs,
+          display: area[i].rel
+        });
+      }
+      return results1;
     }
-    return results;
   };
 
   return Chart;
@@ -1694,7 +1665,7 @@ Overlay = (function() {
         value = slice[n];
         ref = colorStops[n % colorStops.length], r = ref[0], g = ref[1], b = ref[2];
         color = "rgb(" + r + "," + g + "," + b + ")";
-        y = chartTop + (1 - value) * height;
+        y = chartTop + (1 - value.abs) * height;
         ctx.fillStyle = color;
         ctx.beginPath();
         ctx.arc(x, y, 3, 0, Math.PI * 2);
@@ -1714,8 +1685,8 @@ Overlay = (function() {
     results = [];
     for (n = j = 0, len = slice.length; j < len; n = ++j) {
       value = slice[n];
-      this.table.rows[n].percent.textContent = (value * 100).toFixed(1);
-      results.push(this.table.rows[n].bar.css('width', value * 100));
+      this.table.rows[n].percent.textContent = (value.display * 100).toFixed(1);
+      results.push(this.table.rows[n].bar.css('width', value.display * 100));
     }
     return results;
   };
@@ -1728,9 +1699,9 @@ Overlay = (function() {
     labels = [];
     for (i = j = 0, len = slice.length; j < len; i = ++j) {
       value = slice[i];
-      y = chartTop + (1 - value) * height;
+      y = chartTop + (1 - value.abs) * height;
       label = this.chart.areaLabels[i] + ' =';
-      percent = (value * 100).toFixed(1) + '%';
+      percent = (value.display * 100).toFixed(1) + '%';
       ref = colorStops[i % colorStops.length], r = ref[0], g = ref[1], b = ref[2];
       r = Math.round(r * 0.75 + 255 * 0.25);
       g = Math.round(g * 0.75 + 255 * 0.25);
@@ -1839,7 +1810,7 @@ exports.index = StackedPercentage = (function() {
 
   StackedPercentage.prototype.update = function(params) {
     this.chart.update(params);
-    this.table.fill(this.chart.areaLabels);
+    this.table.fill(this.chart.areaLabels, params);
     return this.overlay.updateTable(1);
   };
 
@@ -1938,19 +1909,31 @@ exports.index = Series = (function() {
 
   Series.prototype.update = function(items) {
     var item, values;
-    values = (function() {
-      var k, len, results;
-      results = [];
-      for (k = 0, len = items.length; k < len; k++) {
-        item = items[k];
-        if (item.total > 0) {
-          results.push(item.values[1] / item.total);
-        } else {
-          results.push(0);
+    if (items[0].values != null) {
+      values = (function() {
+        var k, len, results;
+        results = [];
+        for (k = 0, len = items.length; k < len; k++) {
+          item = items[k];
+          if (item.total > 0) {
+            results.push(item.values[1] / item.total);
+          } else {
+            results.push(0);
+          }
         }
-      }
-      return results;
-    })();
+        return results;
+      })();
+    } else {
+      values = (function() {
+        var k, len, results;
+        results = [];
+        for (k = 0, len = items.length; k < len; k++) {
+          item = items[k];
+          results.push(item.value);
+        }
+        return results;
+      })();
+    }
     return this.elem.sparkline(values, {
       type: 'line',
       chartRangeMin: 0,
@@ -1968,12 +1951,16 @@ exports.index = Series = (function() {
         var value, x;
         x = fields.x;
         item = items[x];
-        if (item.total > 0) {
-          value = (item.values[1] / item.total) * 100;
+        if (item.total != null) {
+          if (item.total > 0) {
+            value = (item.values[1] / item.total) * 100;
+          } else {
+            value = 0;
+          }
+          return "<span>" + item.name + " - " + (value.toFixed(0)) + "%<br/>(" + (util.formatNumber(item.total)) + " samples)</span>";
         } else {
-          value = 0;
+          return "<span>" + item.name + " - " + (util.formatNumber(item.value)) + "</span>";
         }
-        return "<span>" + item.name + " - " + (value.toFixed(0)) + "%<br/>(" + (util.formatNumber(item.total)) + " samples)</span>";
       }
     });
   };
@@ -1983,7 +1970,7 @@ exports.index = Series = (function() {
 })();
 });
 moduleManager.module('/views/filter', function(exports,sys){
-var EventHub, Filter, Tree, addNode, behavior, buildTree, db, sortNode, util,
+var Filter, Tree, addNode, behavior, buildTree, db, sortNode, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 db = sys["import"]('db');
@@ -1993,8 +1980,6 @@ util = sys["import"]('/util');
 behavior = sys["import"]('behavior');
 
 Tree = sys["import"]('tree');
-
-EventHub = sys["import"]('event-hub');
 
 addNode = function(parent, parts, count, key) {
   var child, name;
@@ -2075,7 +2060,6 @@ exports.index = Filter = (function() {
     this.height = util.measureHeight(this.container[0]);
     this.link.on('click', this.toggle);
     this.expanded = false;
-    this.changeHandlers = new EventHub();
     this.tree = new Tree({
       container: this.container,
       checkChange: this.filterChanged,
@@ -2100,18 +2084,19 @@ exports.index = Filter = (function() {
       })(this)
     });
     this.platforms = null;
+    this.listeners = [];
   }
 
-  Filter.prototype.onChange = function(fun) {
-    return this.changeHandlers.bind(fun);
-  };
-
-  Filter.prototype.offChange = function(fun) {
-    return this.changeHandlers.unbind(fun);
+  Filter.prototype.onChange = function(elem, listener) {
+    this.listeners.push({
+      elem: elem,
+      change: listener
+    });
+    return listener();
   };
 
   Filter.prototype.filterChanged = function() {
-    var values;
+    var j, len, listener, listeners, ref, values;
     if (this.tree.status === 'checked') {
       this.platforms = null;
     } else {
@@ -2123,7 +2108,16 @@ exports.index = Filter = (function() {
       });
       this.platforms = values;
     }
-    return this.changeHandlers.trigger(values);
+    listeners = [];
+    ref = this.listeners;
+    for (j = 0, len = ref.length; j < len; j++) {
+      listener = ref[j];
+      if (document.body.contains(listener.elem[0])) {
+        listener.change(false);
+        listeners.push(listener);
+      }
+    }
+    return this.listeners = listeners;
   };
 
   Filter.prototype.addNode = function(parentNode, dataParent, dataChild, depth) {
@@ -2393,49 +2387,6 @@ exports.index = Node = (function() {
 
 })();
 });
-moduleManager.module('/views/event-hub', function(exports,sys){
-var EventHub,
-  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-exports.index = EventHub = (function() {
-  function EventHub() {
-    this.listeners = [];
-  }
-
-  EventHub.prototype.bind = function(handler) {
-    if (indexOf.call(this.listeners, handler) < 0) {
-      this.listeners.push(handler);
-    }
-    return this;
-  };
-
-  EventHub.prototype.unbind = function(handler) {
-    var idx;
-    idx = this.listeners.indexOf(handler);
-    if (idx >= 0) {
-      return this.listeners[idx] = null;
-    }
-  };
-
-  EventHub.prototype.trigger = function(data) {
-    var handler, i, len, listeners, ref;
-    listeners = [];
-    ref = this.listeners;
-    for (i = 0, len = ref.length; i < len; i++) {
-      handler = ref[i];
-      if (handler != null) {
-        handler(data);
-        listeners.push(handler);
-      }
-    }
-    this.listeners = listeners;
-    return this;
-  };
-
-  return EventHub;
-
-})();
-});
 moduleManager.module('/chart/bar', function(exports,sys){
 var Bar, normalize;
 
@@ -2539,8 +2490,8 @@ exports.formatNumber = function(n) {
   }
 };
 
-exports.parseQs = function() {
-  return null;
+exports.capitalize = function(s) {
+  return s[0].toUpperCase() + s.slice(1);
 };
 });
 moduleManager.module('/views/behavior', function(exports,sys){
@@ -2649,6 +2600,267 @@ exports.index = Search = (function() {
   };
 
   return Search;
+
+})();
+});
+moduleManager.module('/views/traffic', function(exports,sys){
+var Donut, Gauge, Series, StackedPercentage, Traffic, behavior, db, ref, util;
+
+db = sys["import"]('db');
+
+util = sys["import"]('/util');
+
+behavior = sys["import"]('behavior');
+
+ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series, Donut = ref.Donut, StackedPercentage = ref.StackedPercentage;
+
+exports.index = Traffic = (function() {
+  function Traffic(filter, search) {
+    this.filter = filter;
+    null;
+  }
+
+  Traffic.prototype.show = function() {
+    var col, full, mainRow, widget;
+    behavior.deactivate();
+    behavior.collapse(this);
+    mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
+    col = $('<div></div>').appendTo(mainRow);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1>Visits</h1>').appendTo(widget);
+    this.series().appendTo(widget);
+    col = $('<div></div>').appendTo(mainRow);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1>Platform (30 days)</h1>').appendTo(widget);
+    this.donut('useragent.device').appendTo(widget);
+    mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
+    col = $('<div></div>').appendTo(mainRow);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1>Operating System (30 days)</h1>').appendTo(widget);
+    this.donut('useragent.os').appendTo(widget);
+    col = $('<div></div>').appendTo(mainRow);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1>Browser (30 days)</h1>').appendTo(widget);
+    this.donut('useragent.family').appendTo(widget);
+    full = $('<div class="full box"></div>').appendTo('main');
+    $('<h1>Platform</h1>').appendTo(full);
+    this.stackedPercentage('useragent.device').appendTo(full);
+    full = $('<div class="full box"></div>').appendTo('main');
+    $('<h1>Operating System</h1>').appendTo(full);
+    this.stackedPercentage('useragent.os').appendTo(full);
+    full = $('<div class="full box"></div>').appendTo('main');
+    $('<h1>Browser</h1>').appendTo(full);
+    return this.stackedPercentage('useragent.family').appendTo(full);
+  };
+
+  Traffic.prototype.donut = function(bucketBy) {
+    var chart;
+    chart = new Donut();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        chart.elem.addClass('spinner');
+        query = {
+          filterBy: {},
+          bucketBy: bucketBy,
+          start: -30
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var label, n, value, values;
+            chart.elem.removeClass('spinner');
+            values = (function() {
+              var i, len, ref1, results;
+              ref1 = result.keys;
+              results = [];
+              for (n = i = 0, len = ref1.length; i < len; n = ++i) {
+                label = ref1[n];
+                value = result.values[n];
+                results.push({
+                  label: util.capitalize(label.replace(/_/g, ' ')) + (" " + ((value * 100 / result.total).toFixed(1)) + "% (" + (util.formatNumber(value)) + ")"),
+                  value: result.values[n]
+                });
+              }
+              return results;
+            })();
+            return chart.update(values);
+          }
+        });
+      };
+    })(this));
+    return $(chart.elem);
+  };
+
+  Traffic.prototype.series = function(name) {
+    var chart;
+    chart = new Series();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        query = {
+          filterBy: {},
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            return chart.update(result.values);
+          }
+        });
+      };
+    })(this));
+    return chart.elem;
+  };
+
+  Traffic.prototype.stackedPercentage = function(bucketBy) {
+    var chart;
+    chart = new StackedPercentage();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        query = {
+          filterBy: {},
+          bucketBy: bucketBy,
+          series: 'daily'
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
+            keys = result.keys;
+            xLabels = [];
+            data = [];
+            if (keys[0] === null) {
+              valueStart = 1;
+              keys.shift();
+            } else {
+              valueStart = 0;
+            }
+            ref1 = result.values;
+            for (i = 0, len = ref1.length; i < len; i++) {
+              item = ref1[i];
+              xLabels.push(item.name);
+              values = [];
+              ref2 = item.values.slice(valueStart);
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                value = ref2[j];
+                if (item.total === 0) {
+                  values.push(0);
+                } else {
+                  values.push(value / item.total);
+                }
+              }
+              data.push(values);
+            }
+            return chart.update({
+              areaLabels: keys,
+              xLabels: xLabels,
+              data: data,
+              type: 'rel'
+            });
+          }
+        });
+      };
+    })(this));
+    return $(chart.elem);
+  };
+
+  return Traffic;
+
+})();
+});
+moduleManager.module('/chart/donut', function(exports,sys){
+var Donut, colors;
+
+colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
+
+exports.index = Donut = (function() {
+  function Donut(options) {
+    var canvas, ref, ref1;
+    if (options == null) {
+      options = {};
+    }
+    this.width = (ref = options.width) != null ? ref : 160;
+    this.height = (ref1 = options.height) != null ? ref1 : 160;
+    this.elem = $('<div class="donut"></div>');
+    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
+    canvas.width = this.width;
+    canvas.height = this.height;
+    this.ctx = canvas.getContext('2d');
+    this.legend = $('<div></div>').appendTo(this.elem);
+  }
+
+  Donut.prototype.update = function(values) {
+    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
+    values.sort(function(a, b) {
+      return b.value - a.value;
+    });
+    values = values.filter(function(entry) {
+      return entry.value > 0;
+    });
+    this.legend.empty();
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    total = 0;
+    for (i = 0, len = values.length; i < len; i++) {
+      entry = values[i];
+      total += entry.value;
+    }
+    start = 0;
+    results = [];
+    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
+      entry = values[n];
+      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
+      color = "rgb(" + r + "," + g + "," + b + ")";
+      end = start + entry.value / total;
+      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
+      this.segment(start, end, color);
+      this.separator(end);
+      results.push(start = end);
+    }
+    return results;
+  };
+
+  Donut.prototype.separator = function(pos) {
+    var a, cx, cy, r1, r2, x1, x2, y1, y2;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    a = Math.PI * 2 * pos - Math.PI / 2;
+    cx = this.width / 2;
+    cy = this.height / 2;
+    x1 = cx + Math.cos(a) * r1;
+    y1 = cy + Math.sin(a) * r1;
+    x2 = cx + Math.cos(a) * r2;
+    y2 = cy + Math.sin(a) * r2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    return this.ctx.stroke();
+  };
+
+  Donut.prototype.segment = function(start, end, color) {
+    var r1, r2;
+    start = Math.PI * 2 * start - Math.PI / 2;
+    end = Math.PI * 2 * end - Math.PI / 2;
+    this.ctx.fillStyle = color;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    this.ctx.beginPath();
+    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
+    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
+    return this.ctx.fill();
+  };
+
+  return Donut;
 
 })();
 });
