@@ -126,7 +126,7 @@ exports.index = class Traffic
         @filter.onChange chart.elem, =>
             query =
                 filterBy: {}
-                series: 'daily'
+                series: 'weekly'
 
             if @filter.platforms?
                 query.filterBy.platform = @filter.platforms
@@ -145,7 +145,7 @@ exports.index = class Traffic
             query =
                 filterBy: {}
                 bucketBy: bucketBy
-                series: 'daily'
+                series: 'weekly'
 
             if @filter.platforms?
                 query.filterBy.platform = @filter.platforms

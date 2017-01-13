@@ -329,7 +329,7 @@ exports.index = class Extensions
                 filterBy:
                     webgl:true
                 bucketBy:fieldName
-                series: 'daily'
+                series: 'weekly'
 
             if @filter.platforms?
                 query.filterBy.platform = @filter.platforms

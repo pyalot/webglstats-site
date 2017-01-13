@@ -528,7 +528,7 @@ exports.index = Extensions = (function() {
             webgl: true
           },
           bucketBy: fieldName,
-          series: 'daily'
+          series: 'weekly'
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -772,7 +772,7 @@ exports.index = Parameters = (function() {
             webgl: true
           },
           bucketBy: fieldName,
-          series: 'daily'
+          series: 'weekly'
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -1026,7 +1026,7 @@ exports.index = Main = (function() {
         var query;
         query = {
           bucketBy: 'webgl',
-          series: 'daily'
+          series: 'weekly'
         };
         if (_this.filter.platforms != null) {
           query.filterBy = {
@@ -2703,7 +2703,7 @@ exports.index = Traffic = (function() {
         var query;
         query = {
           filterBy: {},
-          series: 'daily'
+          series: 'weekly'
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -2728,7 +2728,7 @@ exports.index = Traffic = (function() {
         query = {
           filterBy: {},
           bucketBy: bucketBy,
-          series: 'daily'
+          series: 'weekly'
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
