@@ -186,7 +186,7 @@ exports.index = class Parameters
                 filterBy:
                     webgl:true
                 bucketBy:fieldName
-                series: 'weekly'
+                series: @filter.series
 
             if @filter.platforms?
                 query.filterBy.platform = @filter.platforms

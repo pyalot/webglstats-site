@@ -570,21 +570,63 @@ body > nav div.content > div > a > span.arrow {
   border-bottom: 5px solid transparent;
   border-right: 5px solid white;
 }
-body > nav div.content > div > div {
+body > nav div.content > div > div.filter {
   transition: height 0.4s;
   display: none;
   overflow: hidden;
   background-color: #3e3d3b;
-  /*
-                > ul{
-                    border-top: 1px solid rgb(32,32,32);
-                    padding-top: 5px;
-                    padding-bottom: 5px;
-
-                }
-                */
 }
-body > nav div.content > div > div div {
+body > nav div.content > div > div.filter .option {
+  margin-bottom: 5px;
+}
+body > nav div.content > div > div.filter .option > label {
+  margin-right: 10px;
+}
+body > nav div.content > div > div.filter .radio {
+  display: inline-flex;
+}
+body > nav div.content > div > div.filter .radio > * {
+  background-color: rgba(255, 255, 255, 0.1);
+  font-size: 14px;
+  border: 1px solid #13171a;
+  border-radius: 0px;
+  margin: 0;
+  cursor: pointer;
+  position: relative;
+  top: 0px;
+  left: 0px;
+  outline: 0;
+  padding: 2px 6px 3px 6px;
+}
+body > nav div.content > div > div.filter .radio > *:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+body > nav div.content > div > div.filter .radio > *:active {
+  background-color: #c57f00;
+  color: black;
+}
+body > nav div.content > div > div.filter .radio > *:first-child {
+  border-radius: 10px 0px 0px 10px;
+  padding: 2px 6px 3px 8px;
+}
+body > nav div.content > div > div.filter .radio > *:not(:last-child) {
+  border-right: none;
+}
+body > nav div.content > div > div.filter .radio > *:last-child {
+  border-radius: 0px 10px 10px 0px;
+  padding: 2px 8px 3px 6px;
+}
+body > nav div.content > div > div.filter .radio > *.active {
+  background-color: #c57f00;
+  color: black;
+}
+body > nav div.content > div > div.filter > div {
+  border-top: 1px solid #202020;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  padding-left: 5px;
+}
+body > nav div.content > div > div.filter > div > div.tree div {
   border: 1px solid #202020;
   margin: 1px;
   margin-top: 2px;
@@ -595,7 +637,7 @@ body > nav div.content > div > div div {
   background-color: rgba(255, 255, 255, 0.1);
   font-size: 14px;
 }
-body > nav div.content > div > div div > span.arrow {
+body > nav div.content > div > div.filter > div > div.tree div > span.arrow {
   position: absolute;
   left: 6px;
   top: 50%;
@@ -607,13 +649,13 @@ body > nav div.content > div > div div > span.arrow {
   border-bottom: 5px solid transparent;
   border-right: 5px solid white;
 }
-body > nav div.content > div > div div.expanded > span.arrow {
+body > nav div.content > div > div.filter > div > div.tree div.expanded > span.arrow {
   transform: translateY(-50%) rotate(-90deg);
 }
-body > nav div.content > div > div div.collapsed > span.arrow {
+body > nav div.content > div > div.filter > div > div.tree div.collapsed > span.arrow {
   transform: translateY(-50%) rotate(-180deg);
 }
-body > nav div.content > div > div div > span.checkbox {
+body > nav div.content > div > div.filter > div > div.tree div > span.checkbox {
   position: absolute;
   display: inline-block;
   left: 18px;
@@ -623,16 +665,16 @@ body > nav div.content > div > div div > span.checkbox {
   background-image: url("/img/checkbox.png");
   transform: translateY(-50%);
 }
-body > nav div.content > div > div div > span.checkbox.unchecked {
+body > nav div.content > div > div.filter > div > div.tree div > span.checkbox.unchecked {
   background-position: left 0px top 0px;
 }
-body > nav div.content > div > div div > span.checkbox.checked {
+body > nav div.content > div > div.filter > div > div.tree div > span.checkbox.checked {
   background-position: left 12px top 0px;
 }
-body > nav div.content > div > div div > span.checkbox.semichecked {
+body > nav div.content > div > div.filter > div > div.tree div > span.checkbox.semichecked {
   background-position: left 24px top 0px;
 }
-body > nav div.content > div > div li {
+body > nav div.content > div > div.filter > div > div.tree li {
   margin-left: 12px;
 }
 body > nav div.content > div > ul {

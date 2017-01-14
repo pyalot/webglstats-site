@@ -528,7 +528,7 @@ exports.index = Extensions = (function() {
             webgl: true
           },
           bucketBy: fieldName,
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -561,7 +561,7 @@ exports.index = Extensions = (function() {
             obj
           ),
           bucketBy: fieldname,
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -772,7 +772,7 @@ exports.index = Parameters = (function() {
             webgl: true
           },
           bucketBy: fieldName,
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -1026,7 +1026,7 @@ exports.index = Main = (function() {
         var query;
         query = {
           bucketBy: 'webgl',
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy = {
@@ -1970,7 +1970,7 @@ exports.index = Series = (function() {
 })();
 });
 moduleManager.module('/views/filter', function(exports,sys){
-var Filter, Tree, addNode, behavior, buildTree, db, sortNode, util,
+var Filter, Radio, Tree, addNode, behavior, buildTree, db, sortNode, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 db = sys["import"]('db');
@@ -2047,21 +2047,88 @@ sortNode = function(node) {
   }
 };
 
+Radio = (function() {
+  function Radio(parent, change) {
+    this.change = change;
+    if (this.change == null) {
+      this.change = function() {};
+    }
+    this.container = $('<div class="radio"></div>').appendTo(parent);
+    this.options = {};
+    this.value = null;
+  }
+
+  Radio.prototype.add = function(arg) {
+    var active, label, option, ref, value;
+    label = arg.label, value = arg.value, active = (ref = arg.active) != null ? ref : false;
+    if (value == null) {
+      value = label;
+    }
+    option = this.options[value] = $('<div></div>').text(label).appendTo(this.container).click((function(_this) {
+      return function() {
+        return _this.activate(value);
+      };
+    })(this));
+    if (active) {
+      this.value = value;
+      option.addClass('active');
+    }
+    return this;
+  };
+
+  Radio.prototype.activate = function(activateValue) {
+    var option, ref, value;
+    ref = this.options;
+    for (value in ref) {
+      option = ref[value];
+      option.removeClass('active');
+    }
+    this.options[activateValue].addClass('active');
+    this.value = activateValue;
+    return this.change(this.value);
+  };
+
+  return Radio;
+
+})();
+
 exports.index = Filter = (function() {
   function Filter(parent) {
     this.toggle = bind(this.toggle, this);
     this.filterChanged = bind(this.filterChanged, this);
+    this.seriesChanged = bind(this.seriesChanged, this);
+    this.notifyListeners = bind(this.notifyListeners, this);
+    var series;
     behavior.collapsable(this);
     this.parent = $(parent);
     this.link = this.parent.find('a');
-    this.container = $('<div></div>').appendTo(this.parent);
+    this.container = $('<div class="filter"></div>').appendTo(this.parent);
+    this.content = $('<div></div>').appendTo(this.container);
+    series = $('<div class="option"></div>').appendTo(this.content);
+    $('<label>Series</label>').appendTo(series);
+    this.series = 'weekly';
+    new Radio(series, this.seriesChanged).add({
+      label: 'Day',
+      value: 'daily'
+    }).add({
+      label: 'Week',
+      value: 'weekly',
+      active: true
+    }).add({
+      label: 'Month',
+      value: 'monthly'
+    }).add({
+      label: 'Year',
+      value: 'yearly'
+    });
+    this.treeContainer = $('<div class="tree"></div>').appendTo(this.content);
     this.container.css('display', 'block');
     this.container[0].style.height = '0px';
     this.height = util.measureHeight(this.container[0]);
     this.link.on('click', this.toggle);
     this.expanded = false;
     this.tree = new Tree({
-      container: this.container,
+      container: this.treeContainer,
       checkChange: this.filterChanged,
       name: 'All'
     });
@@ -2095,8 +2162,27 @@ exports.index = Filter = (function() {
     return listener();
   };
 
+  Filter.prototype.notifyListeners = function() {
+    var j, len, listener, listeners, ref;
+    listeners = [];
+    ref = this.listeners;
+    for (j = 0, len = ref.length; j < len; j++) {
+      listener = ref[j];
+      if (document.body.contains(listener.elem[0])) {
+        listener.change();
+        listeners.push(listener);
+      }
+    }
+    return this.listeners = listeners;
+  };
+
+  Filter.prototype.seriesChanged = function(value) {
+    this.series = value;
+    return this.notifyListeners();
+  };
+
   Filter.prototype.filterChanged = function() {
-    var j, len, listener, listeners, ref, values;
+    var values;
     if (this.tree.status === 'checked') {
       this.platforms = null;
     } else {
@@ -2108,16 +2194,7 @@ exports.index = Filter = (function() {
       });
       this.platforms = values;
     }
-    listeners = [];
-    ref = this.listeners;
-    for (j = 0, len = ref.length; j < len; j++) {
-      listener = ref[j];
-      if (document.body.contains(listener.elem[0])) {
-        listener.change(false);
-        listeners.push(listener);
-      }
-    }
-    return this.listeners = listeners;
+    return this.notifyListeners();
   };
 
   Filter.prototype.addNode = function(parentNode, dataParent, dataChild, depth) {
@@ -2603,91 +2680,6 @@ exports.index = Search = (function() {
 
 })();
 });
-moduleManager.module('/chart/donut', function(exports,sys){
-var Donut, colors;
-
-colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
-
-exports.index = Donut = (function() {
-  function Donut(options) {
-    var canvas, ref, ref1;
-    if (options == null) {
-      options = {};
-    }
-    this.width = (ref = options.width) != null ? ref : 160;
-    this.height = (ref1 = options.height) != null ? ref1 : 160;
-    this.elem = $('<div class="donut"></div>');
-    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
-    canvas.width = this.width;
-    canvas.height = this.height;
-    this.ctx = canvas.getContext('2d');
-    this.legend = $('<div></div>').appendTo(this.elem);
-  }
-
-  Donut.prototype.update = function(values) {
-    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
-    values.sort(function(a, b) {
-      return b.value - a.value;
-    });
-    values = values.filter(function(entry) {
-      return entry.value > 0;
-    });
-    this.legend.empty();
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    total = 0;
-    for (i = 0, len = values.length; i < len; i++) {
-      entry = values[i];
-      total += entry.value;
-    }
-    start = 0;
-    results = [];
-    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
-      entry = values[n];
-      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
-      color = "rgb(" + r + "," + g + "," + b + ")";
-      end = start + entry.value / total;
-      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
-      this.segment(start, end, color);
-      this.separator(end);
-      results.push(start = end);
-    }
-    return results;
-  };
-
-  Donut.prototype.separator = function(pos) {
-    var a, cx, cy, r1, r2, x1, x2, y1, y2;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    a = Math.PI * 2 * pos - Math.PI / 2;
-    cx = this.width / 2;
-    cy = this.height / 2;
-    x1 = cx + Math.cos(a) * r1;
-    y1 = cy + Math.sin(a) * r1;
-    x2 = cx + Math.cos(a) * r2;
-    y2 = cy + Math.sin(a) * r2;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x1, y1);
-    this.ctx.lineTo(x2, y2);
-    return this.ctx.stroke();
-  };
-
-  Donut.prototype.segment = function(start, end, color) {
-    var r1, r2;
-    start = Math.PI * 2 * start - Math.PI / 2;
-    end = Math.PI * 2 * end - Math.PI / 2;
-    this.ctx.fillStyle = color;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    this.ctx.beginPath();
-    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
-    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
-    return this.ctx.fill();
-  };
-
-  return Donut;
-
-})();
-});
 moduleManager.module('/views/traffic', function(exports,sys){
 var Donut, Gauge, Series, StackedPercentage, Traffic, behavior, db, ref, util;
 
@@ -2788,7 +2780,7 @@ exports.index = Traffic = (function() {
         var query;
         query = {
           filterBy: {},
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -2813,7 +2805,7 @@ exports.index = Traffic = (function() {
         query = {
           filterBy: {},
           bucketBy: bucketBy,
-          series: 'weekly'
+          series: _this.filter.series
         };
         if (_this.filter.platforms != null) {
           query.filterBy.platform = _this.filter.platforms;
@@ -2861,6 +2853,91 @@ exports.index = Traffic = (function() {
   };
 
   return Traffic;
+
+})();
+});
+moduleManager.module('/chart/donut', function(exports,sys){
+var Donut, colors;
+
+colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
+
+exports.index = Donut = (function() {
+  function Donut(options) {
+    var canvas, ref, ref1;
+    if (options == null) {
+      options = {};
+    }
+    this.width = (ref = options.width) != null ? ref : 160;
+    this.height = (ref1 = options.height) != null ? ref1 : 160;
+    this.elem = $('<div class="donut"></div>');
+    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
+    canvas.width = this.width;
+    canvas.height = this.height;
+    this.ctx = canvas.getContext('2d');
+    this.legend = $('<div></div>').appendTo(this.elem);
+  }
+
+  Donut.prototype.update = function(values) {
+    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
+    values.sort(function(a, b) {
+      return b.value - a.value;
+    });
+    values = values.filter(function(entry) {
+      return entry.value > 0;
+    });
+    this.legend.empty();
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    total = 0;
+    for (i = 0, len = values.length; i < len; i++) {
+      entry = values[i];
+      total += entry.value;
+    }
+    start = 0;
+    results = [];
+    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
+      entry = values[n];
+      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
+      color = "rgb(" + r + "," + g + "," + b + ")";
+      end = start + entry.value / total;
+      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
+      this.segment(start, end, color);
+      this.separator(end);
+      results.push(start = end);
+    }
+    return results;
+  };
+
+  Donut.prototype.separator = function(pos) {
+    var a, cx, cy, r1, r2, x1, x2, y1, y2;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    a = Math.PI * 2 * pos - Math.PI / 2;
+    cx = this.width / 2;
+    cy = this.height / 2;
+    x1 = cx + Math.cos(a) * r1;
+    y1 = cy + Math.sin(a) * r1;
+    x2 = cx + Math.cos(a) * r2;
+    y2 = cy + Math.sin(a) * r2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    return this.ctx.stroke();
+  };
+
+  Donut.prototype.segment = function(start, end, color) {
+    var r1, r2;
+    start = Math.PI * 2 * start - Math.PI / 2;
+    end = Math.PI * 2 * end - Math.PI / 2;
+    this.ctx.fillStyle = color;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    this.ctx.beginPath();
+    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
+    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
+    return this.ctx.fill();
+  };
+
+  return Donut;
 
 })();
 });

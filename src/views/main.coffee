@@ -137,7 +137,7 @@ exports.index = class Main
         @filter.onChange chart.elem, =>
             query =
                 bucketBy:'webgl'
-                series: 'weekly'
+                series: @filter.series
 
             if @filter.platforms?
                 query.filterBy =

@@ -47,13 +47,64 @@ sortNode = (node) ->
 
         node.children = children
 
+class Radio
+    constructor: (parent, @change) ->
+        @change ?= ->
+
+        @container = $('<div class="radio"></div>')
+            .appendTo(parent)
+
+        @options = {}
+        @value = null
+
+    add: ({label, value, active=false}) ->
+        value ?= label
+
+        option = @options[value] = $('<div></div>')
+            .text(label)
+            .appendTo(@container)
+            .click(=> @activate(value))
+
+        if active
+            @value = value
+            option.addClass('active')
+
+        return @
+
+    activate: (activateValue) ->
+        for value, option of @options
+            option.removeClass('active')
+
+        @options[activateValue].addClass('active')
+        @value = activateValue
+        @change(@value)
+
 exports.index = class Filter
     constructor: (parent) ->
         behavior.collapsable(@)
         @parent = $(parent)
         @link = @parent.find('a')
-        @container = $('<div></div>')
+
+        @container = $('<div class="filter"></div>')
             .appendTo(@parent)
+
+        @content = $('<div></div>')
+            .appendTo(@container)
+        
+        series = $('<div class="option"></div>')
+            .appendTo(@content)
+        $('<label>Series</label>')
+            .appendTo(series)
+        @series = 'weekly'
+        new Radio(series, @seriesChanged)
+            .add(label: 'Day', value:'daily')
+            .add(label:'Week', value:'weekly', active:true)
+            .add(label:'Month', value:'monthly')
+            .add(label:'Year', value:'yearly')
+
+        @treeContainer = $('<div class="tree"></div>')
+            .appendTo(@content)
+
         
         @container.css('display', 'block')
         @container[0].style.height = '0px'
@@ -61,7 +112,7 @@ exports.index = class Filter
         @link.on 'click', @toggle
         @expanded = false
 
-        @tree = new Tree container:@container, checkChange:@filterChanged, name:'All'
+        @tree = new Tree container:@treeContainer, checkChange:@filterChanged, name:'All'
     
         db.execute
             query:
@@ -83,6 +134,18 @@ exports.index = class Filter
         @listeners.push(elem:elem, change:listener)
         listener()
 
+    notifyListeners: =>
+        listeners = []
+        for listener in @listeners
+            if document.body.contains(listener.elem[0])
+                listener.change()
+                listeners.push(listener)
+        @listeners = listeners
+
+    seriesChanged: (value) =>
+        @series = value
+        @notifyListeners()
+
     filterChanged: =>
         if @tree.status == 'checked'
             @platforms = null
@@ -93,12 +156,7 @@ exports.index = class Filter
                     values.push(node.key)
             @platforms = values
 
-        listeners = []
-        for listener in @listeners
-            if document.body.contains(listener.elem[0])
-                listener.change(false)
-                listeners.push(listener)
-        @listeners = listeners
+        @notifyListeners()
 
     addNode: (parentNode, dataParent, dataChild, depth=0) ->
         name = dataChild.name + ' ' + Math.round(dataChild.count*100/dataParent.count).toFixed(0) + '%'
