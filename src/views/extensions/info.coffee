@@ -164,13 +164,11 @@ exports.index =
         '''
         status: 'draft'
         versions: [1,2]
-    ###
     WEBGL_compressed_texture_etc:
         description: '''
         '''
         status: 'community'
         versions: [1,2]
-    ###
     WEBGL_shared_resources:
         description: '''
         '''

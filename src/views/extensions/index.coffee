@@ -20,8 +20,8 @@ exports.index = class Extensions
                     label: extensionLabel(name)
 
         @webgl1.sort (a,b) ->
-            if a < b then -1
-            else if b > a then 1
+            if a.label < b.label then -1
+            else if b.label > a.label then 1
             else 0
 
         @nav = new NavlistExpand('#extension', 'extension', @webgl1)

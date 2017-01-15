@@ -43,7 +43,7 @@ completeRequest = ->
 exports.execute = ({query, success}) ->
     startRequest()
     $.post
-        url: 'https://data.webglstats.com/data',
+        url: 'https://data.webglstats.com/webgl1',
         data: JSON.stringify(query)
         dataType: 'json'
         success: (result) =>
