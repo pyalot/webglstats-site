@@ -248,388 +248,6 @@ exports.index = Views = (function() {
 
 })();
 });
-moduleManager.module('/views/extensions', function(exports,sys){
-var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, info, names, ref, util;
-
-db = sys["import"]('db');
-
-util = sys["import"]('/util');
-
-ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series, StackedPercentage = ref.StackedPercentage;
-
-NavlistExpand = sys["import"]('navlist');
-
-info = {
-  blend_minmax: {
-    prefix: 'EXT',
-    description: 'This extension allows for a blending mode that uses the minimum or maximum of the incoming and present color.\nIt is useful for medical imaging, volume rendering and general purpose computation on the gpu.',
-    spec: '/extensions/EXT_blend_minmax/'
-  },
-  color_buffer_float: {
-    prefix: 'WEBGL',
-    description: 'This extension allows to render into a floating point texture. \n<br/><br/>\nFor historical reasons this is not reliably indicative of renderable floating point textures, and actual support has to be tested individually.',
-    spec: '/extensions/WEBGL_color_buffer_float/'
-  },
-  color_buffer_half_float: {
-    prefix: 'EXT',
-    description: 'This extension allows to render into a half precision floating point texture.',
-    spec: '/extensions/EXT_color_buffer_half_float/'
-  },
-  compressed_texture_astc: {
-    prefix: 'WEBGL',
-    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Adaptive_Scalable_Texture_Compression">ASTC</a>',
-    spec: 'https://www.khronos.org/registry/webgl/extensions/WEBGL_compressed_texture_astc/'
-  },
-  compressed_texture_atc: {
-    prefix: 'WEBGL',
-    description: 'Offers compressed texture format support for ATC.',
-    spec: '/extensions/WEBGL_compressed_texture_atc/'
-  },
-  compressed_texture_etc1: {
-    prefix: 'WEBGL',
-    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.',
-    spec: '/extensions/WEBGL_compressed_texture_etc1/'
-  },
-  compressed_texture_pvrtc: {
-    prefix: 'WEBGL',
-    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/PVRTC">PVRTC</a>.',
-    spec: '/extensions/WEBGL_compressed_texture_pvrtc/'
-  },
-  compressed_texture_s3tc: {
-    prefix: 'WEBGL',
-    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/S3_Texture_Compression">S3TC</a>.',
-    spec: '/extensions/WEBGL_compressed_texture_s3tc/'
-  },
-  debug_renderer_info: {
-    prefix: 'WEBGL',
-    description: 'Allows to query the GPU vendor and model.',
-    spec: '/extensions/WEBGL_debug_renderer_info/'
-  },
-  depth_texture: {
-    prefix: 'WEBGL',
-    description: 'This extension offers the ability to create depth textures to attach to a framebuffer.',
-    spec: '/extensions/WEBGL_depth_texture/'
-  },
-  disjoint_timer_query: {
-    prefix: 'EXT',
-    description: 'This extension offers support for querying the execution time of commands on the GPU.',
-    spec: '/extensions/EXT_disjoint_timer_query/'
-  },
-  draw_buffers: {
-    prefix: 'WEBGL',
-    description: 'This extension allows a framebuffer to hold several textures to render to and a fragment shader to output to them.',
-    spec: '/extensions/WEBGL_draw_buffers/',
-    params: ['MAX_COLOR_ATTACHMENTS_WEBGL', 'MAX_DRAW_BUFFERS_WEBGL']
-  },
-  element_index_uint: {
-    prefix: 'OES',
-    description: 'This extension allows for vertex buffer array indicies to be 32-bit unsigned integers.',
-    spec: '/extensions/OES_element_index_uint/'
-  },
-  frag_depth: {
-    prefix: 'EXT',
-    description: 'This extension allows a fragment shader to write the depth of a fragment.',
-    spec: '/extensions/EXT_frag_depth/'
-  },
-  instanced_arrays: {
-    prefix: 'ANGLE',
-    description: 'This extension offers the ability to repeat some vertex attributes, which can be used to render many instances of an object.',
-    spec: '/extensions/ANGLE_instanced_arrays/'
-  },
-  lose_context: {
-    prefix: 'WEBGL',
-    description: 'This extension simulates a context loss and regain for testing purposes.',
-    spec: '/extensions/WEBGL_lose_context/'
-  },
-  sRGB: {
-    prefix: 'EXT',
-    description: 'This extension offers a texture format whose internal storage is sRGB.',
-    spec: '/extensions/EXT_sRGB/'
-  },
-  shader_texture_lod: {
-    prefix: 'EXT',
-    description: 'This extension allows a texture lookup in a fragment shader to specify a LOD level explicitely.',
-    spec: '/extensions/EXT_shader_texture_lod/'
-  },
-  standard_derivatives: {
-    prefix: 'OES',
-    description: 'This extension allows a fragment shader to obtain the derivatives of a value in regards to neighboring fragments.',
-    spec: '/extensions/OES_standard_derivatives/'
-  },
-  texture_filter_anisotropic: {
-    prefix: 'EXT',
-    description: 'This extension allows textures to be filtered anisotropically.',
-    spec: '/extensions/EXT_texture_filter_anisotropic/',
-    params: ['MAX_TEXTURE_MAX_ANISOTROPY_EXT']
-  },
-  texture_float: {
-    prefix: 'OES',
-    description: 'This extension offers basic support for 32-bit floating point textures.',
-    spec: '/extensions/OES_texture_float/'
-  },
-  texture_float_linear: {
-    prefix: 'OES',
-    description: 'This extension offers the ability to linearly filter 32-bit floating point textures.',
-    spec: '/extensions/OES_texture_float_linear/'
-  },
-  texture_half_float: {
-    prefix: 'OES',
-    description: 'This extension offers basic support for 16-bit floating point textures.',
-    spec: '/extensions/OES_texture_half_float/'
-  },
-  texture_half_float_linear: {
-    prefix: 'OES',
-    description: 'This extension offers the ability to linearly filter 16-bit floating point textures.',
-    spec: '/extensions/OES_texture_half_float_linear/'
-  },
-  vertex_array_object: {
-    prefix: 'OES',
-    description: 'This extension provides a way to group vertex attribute pointer configurations into an object for later use.',
-    spec: '/extensions/OES_vertex_array_object/'
-  }
-};
-
-names = ['blend_minmax', 'color_buffer_float', 'color_buffer_half_float', 'compressed_texture_astc', 'compressed_texture_atc', 'compressed_texture_etc1', 'compressed_texture_pvrtc', 'compressed_texture_s3tc', 'debug_renderer_info', 'depth_texture', 'disjoint_timer_query', 'draw_buffers', 'element_index_uint', 'frag_depth', 'instanced_arrays', 'lose_context', 'sRGB', 'shader_texture_lod', 'standard_derivatives', 'texture_filter_anisotropic', 'texture_float', 'texture_float_linear', 'texture_half_float', 'texture_half_float_linear', 'vertex_array_object'];
-
-exports.index = Extensions = (function() {
-  function Extensions(filter, search) {
-    this.filter = filter;
-    this.nav = new NavlistExpand('#extension', 'extension', names);
-    this.buildSearch(search);
-  }
-
-  Extensions.prototype.buildSearch = function(search) {
-    var i, len, name, results;
-    results = [];
-    for (i = 0, len = names.length; i < len; i++) {
-      name = names[i];
-      results.push((function(_this) {
-        return function(name) {
-          var meta;
-          meta = info[name];
-          return search.add({
-            id: "/webgl/extension/" + name,
-            titles: [meta.prefix + '_' + name, name, name.replace(/_/g, ' ')],
-            body: meta.description,
-            extra: meta.params != null ? meta.params.join(' ') : null,
-            type: 'Extension',
-            gauge: function() {
-              return _this.gauge(name);
-            }
-          });
-        };
-      })(this)(name));
-    }
-    return results;
-  };
-
-  Extensions.prototype.show = function(name, pageload) {
-    var col, i, len, param, ref1, results, row, widget;
-    this.nav.activate(name, pageload);
-    row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
-    col = $('<div></div>').appendTo(row);
-    widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1></h1>').text(info[name].prefix + '_' + name).appendTo(widget);
-    $('<p></p>').append(info[name].description).appendTo(widget);
-    $('<a>Specification</a>').attr('href', 'https://www.khronos.org/registry/webgl' + info[name].spec).appendTo(widget);
-    col = $('<div></div>').appendTo(row);
-    widget = $('<div class="box"></div>').appendTo(col);
-    this.day30view(name, widget);
-    widget = $('<div class="full box"></div>').appendTo('main');
-    this.series(name).appendTo(widget);
-    if (info[name].params != null) {
-      ref1 = info[name].params;
-      results = [];
-      for (i = 0, len = ref1.length; i < len; i++) {
-        param = ref1[i];
-        widget = $('<div class="full box"></div>').appendTo('main');
-        $('<h1></h1>').text(param).appendTo(widget);
-        results.push(this.stackedPercentage(name, param).appendTo(widget));
-      }
-      return results;
-    }
-  };
-
-  Extensions.prototype.overview = function(pageload) {
-    var container, flow, i, len, name, results;
-    flow = $('<div class="flow box"></div>').appendTo('main');
-    $('<h1>Extensions</h1>').appendTo(flow);
-    results = [];
-    for (i = 0, len = names.length; i < len; i++) {
-      name = names[i];
-      container = $('<div></div>').appendTo(flow);
-      this.gauge(name).appendTo(container);
-      results.push($('<a class="label"></a>').attr('href', "/webgl/extension/" + name).text(name).appendTo(container));
-    }
-    return results;
-  };
-
-  Extensions.prototype.gauge = function(name, size, label, device) {
-    var chart, fieldName;
-    if (size == null) {
-      size = 'small';
-    }
-    if (label == null) {
-      label = null;
-    }
-    if (device == null) {
-      device = null;
-    }
-    chart = new Gauge({
-      label: label,
-      size: size
-    });
-    fieldName = "webgl.extensions." + info[name].prefix + "_" + name;
-    this.filter.onChange(chart.elem, (function(_this) {
-      return function() {
-        var query;
-        chart.elem.addClass('spinner');
-        query = {
-          filterBy: {
-            webgl: true
-          },
-          bucketBy: fieldName,
-          start: -30
-        };
-        if (device != null) {
-          query.filterBy['useragent.device'] = device;
-        }
-        if (_this.filter.platforms != null) {
-          query.filterBy.platform = _this.filter.platforms;
-        }
-        return db.execute({
-          query: query,
-          success: function(result) {
-            var percentage;
-            if (result.total > 0) {
-              percentage = result.values[1] / result.total;
-            } else {
-              percentage = 0;
-            }
-            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
-            chart.update(percentage * 100);
-            return chart.elem.removeClass('spinner');
-          }
-        });
-      };
-    })(this));
-    return chart.elem;
-  };
-
-  Extensions.prototype.series = function(name) {
-    var chart, fieldName;
-    fieldName = "webgl.extensions." + info[name].prefix + "_" + name;
-    chart = new Series();
-    this.filter.onChange(chart.elem, (function(_this) {
-      return function() {
-        var query;
-        query = {
-          filterBy: {
-            webgl: true
-          },
-          bucketBy: fieldName,
-          series: _this.filter.series
-        };
-        if (_this.filter.platforms != null) {
-          query.filterBy.platform = _this.filter.platforms;
-        }
-        return db.execute({
-          query: query,
-          success: function(result) {
-            return chart.update(result.values);
-          }
-        });
-      };
-    })(this));
-    return chart.elem;
-  };
-
-  Extensions.prototype.stackedPercentage = function(name, param) {
-    var chart, extname, fieldname;
-    extname = "webgl.extensions." + info[name].prefix + "_" + name;
-    fieldname = extname + "." + param;
-    chart = new StackedPercentage();
-    this.filter.onChange(chart.elem, (function(_this) {
-      return function() {
-        var obj, query;
-        query = {
-          filterBy: (
-            obj = {
-              webgl: true
-            },
-            obj["" + extname] = true,
-            obj
-          ),
-          bucketBy: fieldname,
-          series: _this.filter.series
-        };
-        if (_this.filter.platforms != null) {
-          query.filterBy.platform = _this.filter.platforms;
-        }
-        return db.execute({
-          query: query,
-          success: function(result) {
-            var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
-            keys = result.keys;
-            xLabels = [];
-            data = [];
-            if (keys[0] === null) {
-              valueStart = 1;
-              keys.shift();
-            } else {
-              valueStart = 0;
-            }
-            ref1 = result.values;
-            for (i = 0, len = ref1.length; i < len; i++) {
-              item = ref1[i];
-              xLabels.push(item.name);
-              values = [];
-              ref2 = item.values.slice(valueStart);
-              for (j = 0, len1 = ref2.length; j < len1; j++) {
-                value = ref2[j];
-                if (item.total === 0) {
-                  values.push(0);
-                } else {
-                  values.push(value / item.total);
-                }
-              }
-              data.push(values);
-            }
-            return chart.update({
-              areaLabels: keys,
-              xLabels: xLabels,
-              data: data
-            });
-          }
-        });
-      };
-    })(this));
-    return $(chart.elem);
-  };
-
-  Extensions.prototype.day30view = function(name, parent) {
-    var col, row, smallCharts;
-    $('<h1>Support (30 days)</h1>').appendTo(parent);
-    row = $('<div class="row center"></div>').appendTo(parent);
-    col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'large', 'All').appendTo(col);
-    smallCharts = $('<div></div>').appendTo(row);
-    row = $('<div class="row center"></div>').appendTo(smallCharts);
-    col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Desktop', 'desktop').appendTo(col);
-    col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Smartphone', 'smartphone').appendTo(col);
-    row = $('<div class="row center"></div>').appendTo(smallCharts);
-    col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Tablet', 'tablet').appendTo(col);
-    col = $('<div></div>').appendTo(row);
-    return this.gauge(name, 'small', 'Console', 'game_console').appendTo(col);
-  };
-
-  return Extensions;
-
-})();
-});
 moduleManager.module('/views/parameters', function(exports,sys){
 var Bar, NavlistExpand, Parameters, StackedPercentage, db, fieldNames, info, names, ref;
 
@@ -1154,9 +772,17 @@ exports.index = NavlistExpand = (function() {
   }
 
   NavlistExpand.prototype.add = function(name) {
-    var li;
+    var label, li, tags;
+    if (typeof name === 'string') {
+      label = name;
+      tags = [];
+    } else {
+      label = name.label;
+      tags = name.tags;
+      name = name.name;
+    }
     li = $('<li></li>').appendTo(this.list);
-    $('<a></a>').appendTo(li).text(name).attr('href', "/webgl/" + this.prefix + "/" + name);
+    $('<a></a>').appendTo(li).text(label).attr('href', "/webgl/" + this.prefix + "/" + name);
     return this.entries[name] = li;
   };
 
@@ -2940,6 +2566,522 @@ exports.index = Donut = (function() {
   return Donut;
 
 })();
+});
+moduleManager.module('/views/extensions/index', function(exports,sys){
+var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, extensionLabel, info, ref, util,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+db = sys["import"]('../db');
+
+util = sys["import"]('/util');
+
+ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series, StackedPercentage = ref.StackedPercentage;
+
+NavlistExpand = sys["import"]('../navlist');
+
+info = sys["import"]('info');
+
+extensionLabel = function(name) {
+  var parts;
+  parts = name.split('_');
+  parts.shift();
+  return parts.join('_');
+};
+
+exports.index = Extensions = (function() {
+  function Extensions(filter, search) {
+    var meta, name, ref1;
+    this.filter = filter;
+    this.webgl1 = [];
+    for (name in info) {
+      meta = info[name];
+      if ((indexOf.call(meta.versions, 1) >= 0) && ((ref1 = meta.status) === 'ratified' || ref1 === 'community')) {
+        this.webgl1.push({
+          name: name,
+          label: extensionLabel(name)
+        });
+      }
+    }
+    this.webgl1.sort(function(a, b) {
+      if (a < b) {
+        return -1;
+      } else if (b > a) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    this.nav = new NavlistExpand('#extension', 'extension', this.webgl1);
+    this.buildSearch(search);
+  }
+
+  Extensions.prototype.buildSearch = function(search) {
+    var entry, i, len, ref1, results;
+    ref1 = this.webgl1;
+    results = [];
+    for (i = 0, len = ref1.length; i < len; i++) {
+      entry = ref1[i];
+      results.push((function(_this) {
+        return function(entry) {
+          var meta;
+          meta = info[entry.name];
+          return search.add({
+            id: "/webgl/extension/" + entry.name,
+            titles: [entry.label, entry.name, entry.name.replace(/_/g, ' ')],
+            body: meta.description,
+            extra: meta.params != null ? meta.params.join(' ') : null,
+            type: 'Extension',
+            gauge: function() {
+              return _this.gauge(entry.name);
+            }
+          });
+        };
+      })(this)(entry));
+    }
+    return results;
+  };
+
+  Extensions.prototype.show = function(name, pageload) {
+    var col, i, j, len, len1, meta, param, ref1, ref2, results, row, version, widget;
+    this.nav.activate(name, pageload);
+    meta = info[name];
+    row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
+    col = $('<div></div>').appendTo(row);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1></h1>').text(name).appendTo(widget);
+    $('<p></p>').append(meta.description).appendTo(widget);
+    ref1 = meta.versions;
+    for (i = 0, len = ref1.length; i < len; i++) {
+      version = ref1[i];
+      $('<span class="tag"></span>').text("WebGL " + version).appendTo(widget);
+    }
+    $('<span class="tag"></span>').text(util.capitalize(meta.status)).appendTo(widget);
+    $('<a>Specification</a>').attr('href', 'https://www.khronos.org/registry/webgl/extensions/' + name).appendTo(widget);
+    col = $('<div></div>').appendTo(row);
+    widget = $('<div class="box"></div>').appendTo(col);
+    this.day30view(name, widget);
+    widget = $('<div class="full box"></div>').appendTo('main');
+    this.series(name).appendTo(widget);
+    if (meta.params != null) {
+      ref2 = meta.params;
+      results = [];
+      for (j = 0, len1 = ref2.length; j < len1; j++) {
+        param = ref2[j];
+        widget = $('<div class="full box"></div>').appendTo('main');
+        $('<h1></h1>').text(param).appendTo(widget);
+        results.push(this.stackedPercentage(name, param).appendTo(widget));
+      }
+      return results;
+    }
+  };
+
+  Extensions.prototype.overview = function(pageload) {
+    var container, entry, flow, i, len, ref1, results;
+    flow = $('<div class="flow box"></div>').appendTo('main');
+    $('<h1>Extensions</h1>').appendTo(flow);
+    ref1 = this.webgl1;
+    results = [];
+    for (i = 0, len = ref1.length; i < len; i++) {
+      entry = ref1[i];
+      container = $('<div></div>').appendTo(flow);
+      this.gauge(entry.name).appendTo(container);
+      results.push($('<a class="label"></a>').attr('href', "/webgl/extension/" + entry.name).text(entry.label).appendTo(container));
+    }
+    return results;
+  };
+
+  Extensions.prototype.gauge = function(name, size, label, device) {
+    var chart, fieldName;
+    if (size == null) {
+      size = 'small';
+    }
+    if (label == null) {
+      label = null;
+    }
+    if (device == null) {
+      device = null;
+    }
+    chart = new Gauge({
+      label: label,
+      size: size
+    });
+    fieldName = "webgl.extensions." + name;
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        chart.elem.addClass('spinner');
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          start: -30
+        };
+        if (device != null) {
+          query.filterBy['useragent.device'] = device;
+        }
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var percentage;
+            if (result.total > 0) {
+              percentage = result.values[1] / result.total;
+            } else {
+              percentage = 0;
+            }
+            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+            chart.update(percentage * 100);
+            return chart.elem.removeClass('spinner');
+          }
+        });
+      };
+    })(this));
+    return chart.elem;
+  };
+
+  Extensions.prototype.series = function(name) {
+    var chart, fieldName;
+    fieldName = "webgl.extensions." + name;
+    chart = new Series();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: fieldName,
+          series: _this.filter.series
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            return chart.update(result.values);
+          }
+        });
+      };
+    })(this));
+    return chart.elem;
+  };
+
+  Extensions.prototype.stackedPercentage = function(name, param) {
+    var chart, extname, fieldname;
+    extname = "webgl.extensions." + name;
+    fieldname = extname + "." + param;
+    chart = new StackedPercentage();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var obj, query;
+        query = {
+          filterBy: (
+            obj = {
+              webgl: true
+            },
+            obj["" + extname] = true,
+            obj
+          ),
+          bucketBy: fieldname,
+          series: _this.filter.series
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          query: query,
+          success: function(result) {
+            var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
+            keys = result.keys;
+            xLabels = [];
+            data = [];
+            if (keys[0] === null) {
+              valueStart = 1;
+              keys.shift();
+            } else {
+              valueStart = 0;
+            }
+            ref1 = result.values;
+            for (i = 0, len = ref1.length; i < len; i++) {
+              item = ref1[i];
+              xLabels.push(item.name);
+              values = [];
+              ref2 = item.values.slice(valueStart);
+              for (j = 0, len1 = ref2.length; j < len1; j++) {
+                value = ref2[j];
+                if (item.total === 0) {
+                  values.push(0);
+                } else {
+                  values.push(value / item.total);
+                }
+              }
+              data.push(values);
+            }
+            return chart.update({
+              areaLabels: keys,
+              xLabels: xLabels,
+              data: data
+            });
+          }
+        });
+      };
+    })(this));
+    return $(chart.elem);
+  };
+
+  Extensions.prototype.day30view = function(name, parent) {
+    var col, row, smallCharts;
+    $('<h1>Support (30 days)</h1>').appendTo(parent);
+    row = $('<div class="row center"></div>').appendTo(parent);
+    col = $('<div></div>').appendTo(row);
+    this.gauge(name, 'large', 'All').appendTo(col);
+    smallCharts = $('<div></div>').appendTo(row);
+    row = $('<div class="row center"></div>').appendTo(smallCharts);
+    col = $('<div></div>').appendTo(row);
+    this.gauge(name, 'small', 'Desktop', 'desktop').appendTo(col);
+    col = $('<div></div>').appendTo(row);
+    this.gauge(name, 'small', 'Smartphone', 'smartphone').appendTo(col);
+    row = $('<div class="row center"></div>').appendTo(smallCharts);
+    col = $('<div></div>').appendTo(row);
+    this.gauge(name, 'small', 'Tablet', 'tablet').appendTo(col);
+    col = $('<div></div>').appendTo(row);
+    return this.gauge(name, 'small', 'Console', 'game_console').appendTo(col);
+  };
+
+  return Extensions;
+
+})();
+});
+moduleManager.module('/views/extensions/info', function(exports,sys){
+var names, webgl12, webgl1only, webgl2only;
+
+exports.index = {
+  EXT_blend_minmax: {
+    description: 'This extension allows for a blending mode that uses the minimum or maximum of the incoming and present color.\nIt is useful for medical imaging, volume rendering and general purpose computation on the gpu.',
+    status: 'ratified',
+    versions: [1]
+  },
+  WEBGL_color_buffer_float: {
+    description: 'This extension allows to render into a floating point texture. \n<br/><br/>\nFor historical reasons this is not reliably indicative of renderable floating point textures, and actual support has to be tested individually.',
+    status: 'community',
+    versions: [1]
+  },
+  EXT_color_buffer_half_float: {
+    description: 'This extension allows to render into a half precision floating point texture.',
+    status: 'community',
+    versions: [1]
+  },
+  WEBGL_compressed_texture_astc: {
+    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Adaptive_Scalable_Texture_Compression">ASTC</a>',
+    status: 'community',
+    versions: [1.2]
+  },
+  WEBGL_compressed_texture_atc: {
+    description: 'Offers compressed texture format support for ATC.',
+    status: 'community',
+    versions: [1, 2]
+  },
+  WEBGL_compressed_texture_etc1: {
+    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.',
+    status: 'community',
+    versions: [1, 2]
+  },
+  WEBGL_compressed_texture_pvrtc: {
+    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/PVRTC">PVRTC</a>.',
+    status: 'community',
+    versions: [1, 2]
+  },
+  WEBGL_compressed_texture_s3tc: {
+    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/S3_Texture_Compression">S3TC</a>.',
+    status: 'ratified',
+    versions: [1, 2]
+  },
+  WEBGL_debug_renderer_info: {
+    description: 'Allows to query the GPU vendor and model.',
+    status: 'ratified',
+    versions: [1, 2]
+  },
+  WEBGL_depth_texture: {
+    description: 'This extension offers the ability to create depth textures to attach to a framebuffer.',
+    status: 'ratified',
+    versions: [1]
+  },
+  EXT_disjoint_timer_query: {
+    description: 'This extension offers support for querying the execution time of commands on the GPU.',
+    status: 'community',
+    versions: [1, 2]
+  },
+  WEBGL_draw_buffers: {
+    description: 'This extension allows a framebuffer to hold several textures to render to and a fragment shader to output to them.',
+    params: ['MAX_COLOR_ATTACHMENTS_WEBGL', 'MAX_DRAW_BUFFERS_WEBGL'],
+    status: 'ratified',
+    versions: [1]
+  },
+  OES_element_index_uint: {
+    description: 'This extension allows for vertex buffer array indicies to be 32-bit unsigned integers.',
+    status: 'ratified',
+    versions: [1]
+  },
+  EXT_frag_depth: {
+    description: 'This extension allows a fragment shader to write the depth of a fragment.',
+    status: 'ratified',
+    versions: [1]
+  },
+  ANGLE_instanced_arrays: {
+    description: 'This extension offers the ability to repeat some vertex attributes, which can be used to render many instances of an object.',
+    status: 'ratified',
+    versions: [1]
+  },
+  WEBGL_lose_context: {
+    description: 'This extension simulates a context loss and regain for testing purposes.',
+    status: 'ratified',
+    versions: [1, 2]
+  },
+  EXT_sRGB: {
+    description: 'This extension offers a texture format whose internal storage is sRGB.',
+    status: 'community',
+    versions: [1]
+  },
+  EXT_shader_texture_lod: {
+    description: 'This extension allows a texture lookup in a fragment shader to specify a LOD level explicitely.',
+    status: 'ratified',
+    versions: [1]
+  },
+  OES_standard_derivatives: {
+    description: 'This extension allows a fragment shader to obtain the derivatives of a value in regards to neighboring fragments.',
+    status: 'ratified',
+    versions: [1]
+  },
+  EXT_texture_filter_anisotropic: {
+    description: 'This extension allows textures to be filtered anisotropically.',
+    params: ['MAX_TEXTURE_MAX_ANISOTROPY_EXT'],
+    status: 'ratified',
+    versions: [1, 2]
+  },
+  OES_texture_float: {
+    description: 'This extension offers basic support for 32-bit floating point textures.',
+    status: 'ratified',
+    versions: [1]
+  },
+  OES_texture_float_linear: {
+    description: 'This extension offers the ability to linearly filter 32-bit floating point textures.',
+    status: 'ratified',
+    versions: [1, 2]
+  },
+  OES_texture_half_float: {
+    description: 'This extension offers basic support for 16-bit floating point textures.',
+    status: 'ratified',
+    versions: [1]
+  },
+  OES_texture_half_float_linear: {
+    description: 'This extension offers the ability to linearly filter 16-bit floating point textures.',
+    status: 'ratified',
+    versions: [1]
+  },
+  OES_vertex_array_object: {
+    description: 'This extension provides a way to group vertex attribute pointer configurations into an object for later use.',
+    status: 'ratified',
+    versions: [1]
+  },
+  WEBGL_compressed_texture_s3tc_srgb: {
+    description: '        ',
+    status: 'draft',
+    versions: [1, 2]
+  },
+
+  /*
+  WEBGL_compressed_texture_etc:
+      description: '''
+      '''
+      status: 'community'
+      versions: [1,2]
+   */
+  WEBGL_shared_resources: {
+    description: '        ',
+    status: 'draft',
+    versions: [1, 2]
+  },
+  WEBGL_security_sensitive_resources: {
+    description: '        ',
+    status: 'draft',
+    versions: [1, 2]
+  },
+  OES_EGL_image_external: {
+    description: '        ',
+    status: 'proposal',
+    versions: [1, 2]
+  },
+  WEBGL_debug: {
+    description: '        ',
+    status: 'proposal',
+    versions: [1, 2]
+  },
+  WEBGL_dynamic_texture: {
+    description: '        ',
+    status: 'proposal',
+    versions: [1, 2]
+  },
+  WEBGL_subarray_uploads: {
+    description: '        ',
+    status: 'proposal',
+    versions: [1, 2]
+  },
+
+  /*
+  WEBGL_debug_shaders:
+      description: '''
+      '''
+      status: 'ratified'
+      versions: [1,2]
+   */
+  EXT_color_buffer_float: {
+    description: '        ',
+    status: 'community',
+    versions: [2]
+  },
+  EXT_disjoint_timer_query_webgl2: {
+    description: '        ',
+    status: 'community',
+    versions: [2]
+  },
+  WEBGL_get_buffer_sub_data_async: {
+    description: '        ',
+    status: 'draft',
+    versions: [2]
+  },
+  EXT_float_blend: {
+    description: '        ',
+    status: 'draft',
+    versions: [2]
+  },
+  EXT_clip_cull_distance: {
+    description: '        ',
+    status: 'proposal',
+    versions: [2]
+  },
+  WEBGL_multiview: {
+    description: '        ',
+    status: 'proposal',
+    versions: [2]
+  },
+  OES_fbo_render_mipmap: {
+    description: '        ',
+    status: 'draft',
+    versions: [1]
+  }
+};
+
+webgl1only = 'OES_texture_float\nOES_texture_half_float\nOES_standard_derivatives\nOES_vertex_array_object\nWEBGL_depth_texture\nOES_element_index_uint\nEXT_frag_depth\nWEBGL_draw_buffers\nANGLE_instanced_arrays\nOES_texture_half_float_linear\nEXT_blend_minmax\nEXT_shader_texture_lod\nEXT_color_buffer_half_float\nWEBGL_color_buffer_float\nEXT_sRGB\nOES_fbo_render_mipmap'.trim().split('\n');
+
+webgl2only = 'EXT_color_buffer_float\nEXT_disjoint_timer_query_webgl2\nWEBGL_get_buffer_sub_data_async\nEXT_float_blend\nEXT_clip_cull_distance\nWEBGL_multiview '.trim().split('\n');
+
+webgl12 = 'WEBGL_lose_context\nWEBGL_debug_renderer_info\nWEBGL_compressed_texture_s3tc\nWEBGL_compressed_texture_s3tc_srgb\nEXT_texture_filter_anisotropic\nOES_texture_float_linear\nWEBGL_compressed_texture_atc\nWEBGL_compressed_texture_pvrtc\nWEBGL_compressed_texture_etc1\nEXT_disjoint_timer_query\nWEBGL_compressed_texture_etc\nWEBGL_compressed_texture_astc\nWEBGL_shared_resources\nWEBGL_security_sensitive_resources\nOES_EGL_image_external\nWEBGL_debug\nWEBGL_dynamic_texture\nWEBGL_subarray_uploads\nWEBGL_debug_shaders'.trim().split('\n');
+
+names = ['blend_minmax', 'color_buffer_float', 'color_buffer_half_float', 'compressed_texture_astc', 'compressed_texture_atc', 'compressed_texture_etc1', 'compressed_texture_pvrtc', 'compressed_texture_s3tc', 'debug_renderer_info', 'depth_texture', 'disjoint_timer_query', 'draw_buffers', 'element_index_uint', 'frag_depth', 'instanced_arrays', 'lose_context', 'sRGB', 'shader_texture_lod', 'standard_derivatives', 'texture_filter_anisotropic', 'texture_float', 'texture_float_linear', 'texture_half_float', 'texture_half_float_linear', 'vertex_array_object'];
 });
 moduleManager.index();
 })();

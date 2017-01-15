@@ -22,10 +22,18 @@ exports.index = class NavlistExpand
         @expanded = false
 
     add: (name) ->
+        if typeof(name) == 'string'
+            label = name
+            tags = []
+        else
+            label = name.label
+            tags = name.tags
+            name = name.name
+
         li = $('<li></li>').appendTo(@list)
         $('<a></a>')
             .appendTo(li)
-            .text(name)
+            .text(label)
             .attr('href', "/webgl/#{@prefix}/#{name}") #FIXME for webgl2
 
         @entries[name] = li
