@@ -176,6 +176,9 @@ $(function() {
   $('.navtoggle').click(function() {
     return $('body').toggleClass('sidebar');
   });
+  $('div.overlay').click(function() {
+    return $('body').removeClass('sidebar');
+  });
   return $('form.search').submit(function(event) {
     var term;
     term = $(this).find('input[type=text]').val();
@@ -222,6 +225,7 @@ exports.index = Views = (function() {
       pageload = false;
     }
     $('main').empty();
+    $('body').removeClass('sidebar');
     switch (path) {
       case '/':
         this.main.showInfo();

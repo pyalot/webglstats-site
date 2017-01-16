@@ -26,6 +26,9 @@ $ ->
     $('.navtoggle').click ->
         $('body').toggleClass('sidebar')
 
+    $('div.overlay').click ->
+        $('body').removeClass('sidebar')
+
     $('form.search').submit (event) ->
         term = $(@).find('input[type=text]').val()
         query = "?query=#{term}"

@@ -7,11 +7,27 @@ body > nav{
     }
 }
 
-body.sidebar > nav{
-    width: @sidebarWidth;
+body > div.overlay{
+    height: 100%;
+    width: 100%;
+    background-color: transparent;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    visibility: hidden;
+}
 
-    @media(max-width: 760px){
-        box-shadow: 10px 0px 20px 0px rgba(0,0,0,0.5);
+body.sidebar{
+    > div.overlay{
+        visibility: visible;
+    }
+
+    > nav{
+        width: @sidebarWidth;
+
+        @media(max-width: 760px){
+            box-shadow: 10px 0px 20px 0px rgba(0,0,0,0.5);
+        }
     }
 }
 

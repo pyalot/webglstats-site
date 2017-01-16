@@ -19,6 +19,7 @@ exports.index = class Views
 
     handle: (path, query, pageload=false) ->
         $('main').empty()
+        $('body').removeClass('sidebar')
 
         switch path
             when '/'

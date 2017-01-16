@@ -516,6 +516,18 @@ body > nav {
     width: 0px;
   }
 }
+body > div.overlay {
+  height: 100%;
+  width: 100%;
+  background-color: transparent;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  visibility: hidden;
+}
+body.sidebar > div.overlay {
+  visibility: visible;
+}
 body.sidebar > nav {
   width: 260px;
 }
