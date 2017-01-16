@@ -454,30 +454,6 @@ info = {
   }
 };
 
-
-/*
-names = [
-    'ALIASED_LINE_WIDTH_RANGE'
-    'ALIASED_POINT_SIZE_RANGE'
-    'DEPTH_BITS'
-    'MAX_COMBINED_TEXTURE_IMAGE_UNITS'
-    'MAX_CUBE_MAP_TEXTURE_SIZE'
-    'MAX_FRAGMENT_UNIFORM_VECTORS'
-    'MAX_RENDERBUFFER_SIZE'
-    'MAX_TEXTURE_IMAGE_UNITS'
-    'MAX_TEXTURE_SIZE'
-    'MAX_VARYING_VECTORS'
-    'MAX_VERTEX_ATTRIBS'
-    'MAX_VERTEX_TEXTURE_IMAGE_UNITS'
-    'MAX_VERTEX_UNIFORM_VECTORS'
-    'MAX_VIEWPORT_DIMS'
-    'SAMPLES'
-    'SAMPLE_BUFFERS'
-    'STENCIL_BITS'
-    'SUBPIXEL_BITS'
-]
- */
-
 fieldNames = {
   MAX_VIEWPORT_DIMS: 'MAX_VIEWPORT_DIMS.width',
   ALIASED_LINE_WIDTH_RANGE: 'ALIASED_LINE_WIDTH_RANGE.max',
@@ -505,25 +481,52 @@ exports.index = Parameters = (function() {
         });
       }
     }
-    this.webgl1.sort();
-    this.webgl2.sort();
+    this.webgl1.sort(function(a, b) {
+      if (a.label < b.label) {
+        return -1;
+      } else if (a.label > b.label) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    this.webgl2.sort(function(a, b) {
+      if (a.label < b.label) {
+        return -1;
+      } else if (a.label > b.label) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
     this.nav1 = new NavlistExpand('#parameter-webgl1', 'webgl/parameter', this.webgl1);
     this.nav2 = new NavlistExpand('#parameter-webgl2', 'webgl2/parameter', this.webgl2);
+    this.buildSearch(search);
   }
 
   Parameters.prototype.buildSearch = function(search) {
-    var i, len, name, results;
+    var entry, i, j, len, len1, ref1, ref2, results;
+    ref1 = this.webgl1;
+    for (i = 0, len = ref1.length; i < len; i++) {
+      entry = ref1[i];
+      this.searchAdd(search, 'webgl', 'webgl1', entry.name);
+    }
+    ref2 = this.webgl2;
     results = [];
-    for (i = 0, len = names.length; i < len; i++) {
-      name = names[i];
-      results.push(search.add({
-        id: "/webgl/parameter/" + name,
-        titles: [name, name.replace(/_/g, ' ')],
-        body: info[name].description,
-        type: 'Parameter'
-      }));
+    for (j = 0, len1 = ref2.length; j < len1; j++) {
+      entry = ref2[j];
+      results.push(this.searchAdd(search, 'webgl2', 'webgl2', entry.name));
     }
     return results;
+  };
+
+  Parameters.prototype.searchAdd = function(search, path, version, name) {
+    return search.add({
+      id: "/" + path + "/parameter/" + name,
+      titles: [name, name.replace(/_/g, ' ')],
+      body: info[name].description,
+      type: (util.versionLabel(version)) + " Parameter"
+    });
   };
 
   Parameters.prototype.show = function(webglVersion, name, pageload) {
@@ -2835,7 +2838,7 @@ exports.index = Extensions = (function() {
     this.webgl2.sort(function(a, b) {
       if (a.label < b.label) {
         return -1;
-      } else if (b.label > a.label) {
+      } else if (a.label > b.label) {
         return 1;
       } else {
         return 0;
@@ -2843,32 +2846,40 @@ exports.index = Extensions = (function() {
     });
     this.nav1 = new NavlistExpand('#extension-webgl1', 'webgl/extension', this.webgl1);
     this.nav2 = new NavlistExpand('#extension-webgl2', 'webgl2/extension', this.webgl2);
+    this.buildSearch(search);
   }
 
   Extensions.prototype.buildSearch = function(search) {
-    var entry, i, len, ref1, results;
+    var entry, i, j, len, len1, ref1, ref2, results;
     ref1 = this.webgl1;
-    results = [];
     for (i = 0, len = ref1.length; i < len; i++) {
       entry = ref1[i];
-      results.push((function(_this) {
-        return function(entry) {
-          var meta;
-          meta = info[entry.name];
-          return search.add({
-            id: "/webgl/extension/" + entry.name,
-            titles: [entry.label, entry.name, entry.name.replace(/_/g, ' ')],
-            body: meta.description,
-            extra: meta.params != null ? meta.params.join(' ') : null,
-            type: 'Extension',
-            gauge: function() {
-              return _this.gauge(entry.name);
-            }
-          });
-        };
-      })(this)(entry));
+      this.searchAdd(search, 'webgl', 'webgl1', entry);
+    }
+    ref2 = this.webgl2;
+    results = [];
+    for (j = 0, len1 = ref2.length; j < len1; j++) {
+      entry = ref2[j];
+      results.push(this.searchAdd(search, 'webgl2', 'webgl2', entry));
     }
     return results;
+  };
+
+  Extensions.prototype.searchAdd = function(search, path, version, entry) {
+    var meta;
+    meta = info[entry.name];
+    return search.add({
+      id: "/" + path + "/extension/" + entry.name,
+      titles: [entry.label, entry.name, entry.name.replace(/_/g, ' ')],
+      body: meta.description,
+      extra: meta.params != null ? meta.params.join(' ') : null,
+      type: (util.versionLabel(webglVersion)) + " Extension",
+      gauge: (function(_this) {
+        return function() {
+          return _this.gauge(webglVersion, entry.name);
+        };
+      })(this)
+    });
   };
 
   Extensions.prototype.show = function(webglVersion, name, pageload) {

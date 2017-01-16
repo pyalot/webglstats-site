@@ -251,24 +251,36 @@ exports.index = class Parameters
                     name: name
                     label: name
 
-        @webgl1.sort()
-        @webgl2.sort()
+        @webgl1.sort (a,b) ->
+            if a.label < b.label then return -1
+            else if a.label > b.label then return 1
+            else return 0
+
+        @webgl2.sort (a,b) ->
+            if a.label < b.label then return -1
+            else if a.label > b.label then return 1
+            else return 0
 
         @nav1 = new NavlistExpand('#parameter-webgl1', 'webgl/parameter', @webgl1)
         @nav2 = new NavlistExpand('#parameter-webgl2', 'webgl2/parameter', @webgl2)
 
-        #@buildSearch(search)
+        @buildSearch(search)
 
     buildSearch: (search) ->
-        for name in names
-            search.add
-                id: "/webgl/parameter/#{name}"
-                titles: [
-                    name
-                    name.replace(/_/g, ' ')
-                ]
-                body: info[name].description
-                type: 'Parameter'
+        for entry in @webgl1
+            @searchAdd search, 'webgl', 'webgl1', entry.name
+        for entry in @webgl2
+            @searchAdd search, 'webgl2', 'webgl2', entry.name
+        
+    searchAdd: (search, path, version, name) ->
+        search.add
+            id: "/#{path}/parameter/#{name}"
+            titles: [
+                name
+                name.replace(/_/g, ' ')
+            ]
+            body: info[name].description
+            type: "#{util.versionLabel(version)} Parameter"
 
     show: (webglVersion, name, pageload) ->
         switch webglVersion

@@ -32,30 +32,35 @@ exports.index = class Extensions
 
         @webgl2.sort (a,b) ->
             if a.label < b.label then return -1
-            else if b.label > a.label then return 1
+            else if a.label > b.label then return 1
             else return 0
 
         @nav1 = new NavlistExpand('#extension-webgl1', 'webgl/extension', @webgl1)
         @nav2 = new NavlistExpand('#extension-webgl2', 'webgl2/extension', @webgl2)
 
-        #@buildSearch(search)
+        @buildSearch(search)
     
     buildSearch: (search) ->
         for entry in @webgl1
-            do (entry) =>
-                meta = info[entry.name]
-                search.add
-                    id: "/webgl/extension/#{entry.name}"
-                    titles: [
-                        entry.label,
-                        entry.name,
-                        entry.name.replace(/_/g, ' ')
-                    ]
-                    body: meta.description
-                    extra: if meta.params? then meta.params.join(' ') else null
-                    type: 'Extension'
-                    gauge: =>
-                        @gauge(entry.name)
+            @searchAdd search, 'webgl', 'webgl1', entry
+        for entry in @webgl2
+            @searchAdd search, 'webgl2', 'webgl2', entry
+
+    searchAdd: (search, path, version, entry) ->
+        meta = info[entry.name]
+        search.add
+            id: "/#{path}/extension/#{entry.name}"
+            titles: [
+                entry.label,
+                entry.name,
+                entry.name.replace(/_/g, ' ')
+            ]
+            body: meta.description
+            extra: if meta.params? then meta.params.join(' ') else null
+            type: "#{util.versionLabel(webglVersion)} Extension"
+            gauge: =>
+                @gauge(webglVersion, entry.name)
+
 
     show: (webglVersion, name, pageload) ->
         switch webglVersion
