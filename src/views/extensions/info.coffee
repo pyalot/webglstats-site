@@ -208,11 +208,13 @@ exports.index =
     ###
     EXT_color_buffer_float:
         description: '''
+            This extension allows to render into a floating point texture.
         '''
         status: 'community'
         versions: [2]
     EXT_disjoint_timer_query_webgl2:
         description: '''
+            This extension offers support for querying the execution time of commands on the GPU.
         '''
         status: 'community'
         versions: [2]

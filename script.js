@@ -217,30 +217,41 @@ exports.index = Views = (function() {
   }
 
   Views.prototype.handle = function(path, query, pageload) {
-    var category, name, parts;
+    var category, name, parts, webglVersion;
     if (pageload == null) {
       pageload = false;
     }
     $('main').empty();
-    if (path === '/') {
-      this.main.show(pageload);
-      return this.extensions.overview(pageload);
-    } else if (path === '/search') {
-      return this.search.show(query, pageload);
-    } else if (path === '/traffic') {
-      return this.traffic.show();
-    } else {
-      path = path.slice(1);
-      parts = path.split('/');
-      console.assert(parts.shift() === 'webgl');
-      category = parts.shift();
-      name = parts.shift();
-      switch (category) {
-        case 'parameter':
-          return this.parameters.show(name, pageload);
-        case 'extension':
-          return this.extensions.show(name, pageload);
-      }
+    switch (path) {
+      case '/':
+        this.main.showInfo();
+        this.main.show('webgl1', pageload);
+        return this.main.show('webgl2', pageload);
+      case '/search':
+        return this.search.show(query, pageload);
+      case '/traffic':
+        return this.traffic.show();
+      case '/webgl':
+        this.main.show('webgl1', pageload);
+        return this.extensions.overview('webgl1', pageload);
+      case '/webgl2':
+        this.main.show('webgl2', pageload);
+        return this.extensions.overview('webgl2', pageload);
+      default:
+        path = path.slice(1);
+        parts = path.split('/');
+        webglVersion = {
+          webgl: 'webgl1',
+          webgl2: 'webgl2'
+        }[parts.shift()];
+        category = parts.shift();
+        name = parts.shift();
+        switch (category) {
+          case 'parameter':
+            return this.parameters.show(webglVersion, name, pageload);
+          case 'extension':
+            return this.extensions.show(webglVersion, name, pageload);
+        }
     }
   };
 
@@ -249,9 +260,12 @@ exports.index = Views = (function() {
 })();
 });
 moduleManager.module('/views/parameters', function(exports,sys){
-var Bar, NavlistExpand, Parameters, StackedPercentage, db, fieldNames, info, names, ref;
+var Bar, NavlistExpand, Parameters, StackedPercentage, db, fieldNames, info, ref, util,
+  indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 db = sys["import"]('db');
+
+util = sys["import"]('/util');
 
 NavlistExpand = sys["import"]('navlist');
 
@@ -259,62 +273,210 @@ ref = sys["import"]('/chart'), StackedPercentage = ref.StackedPercentage, Bar = 
 
 info = {
   ALIASED_LINE_WIDTH_RANGE: {
-    description: 'The maximum thickness of line that can be rendered.'
+    description: 'The maximum thickness of line that can be rendered.',
+    versions: [1, 2]
   },
   ALIASED_POINT_SIZE_RANGE: {
-    description: 'The maximum size of point that can be rendered.'
+    description: 'The maximum size of point that can be rendered.',
+    versions: [1, 2]
   },
   DEPTH_BITS: {
-    description: 'The number of bits for the front depthbuffer. Bits may differ in case of a framebuffer.'
+    description: 'The number of bits for the front depthbuffer. Bits may differ in case of a framebuffer.',
+    versions: [1, 2]
   },
   MAX_COMBINED_TEXTURE_IMAGE_UNITS: {
-    description: 'The maximum number of texture units that can be used.\nIf a unit is used by both vertex and fragment shader, this counts as two units against this limit.'
+    description: 'The maximum number of texture units that can be used.\nIf a unit is used by both vertex and fragment shader, this counts as two units against this limit.',
+    versions: [1, 2]
   },
   MAX_CUBE_MAP_TEXTURE_SIZE: {
-    description: 'The maximum size of one side of a cubemap.'
+    description: 'The maximum size of one side of a cubemap.',
+    versions: [1, 2]
   },
   MAX_FRAGMENT_UNIFORM_VECTORS: {
-    description: 'The maximum number of 4-element vectors that can be passed as uniform to the vertex shader. All uniforms are 4-element aligned, a single uniform counts at least as one 4-element vector.'
+    description: 'The maximum number of 4-element vectors that can be passed as uniform to the vertex shader. All uniforms are 4-element aligned, a single uniform counts at least as one 4-element vector.',
+    versions: [1, 2]
   },
   MAX_RENDERBUFFER_SIZE: {
-    description: 'The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer size.'
+    description: 'The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer size.',
+    versions: [1, 2]
   },
   MAX_TEXTURE_IMAGE_UNITS: {
-    description: 'The maxium number of texture units that can be used in a fragment shader.'
+    description: 'The maxium number of texture units that can be used in a fragment shader.',
+    versions: [1, 2]
   },
   MAX_TEXTURE_SIZE: {
-    description: 'The largest texture size (either width or height) that can be created. Note that VRAM may not allow a texture of any given size, it just expresses hardware/driver support for a given size.'
+    description: 'The largest texture size (either width or height) that can be created. Note that VRAM may not allow a texture of any given size, it just expresses hardware/driver support for a given size.',
+    versions: [1, 2]
   },
   MAX_VARYING_VECTORS: {
-    description: 'The maximum number of 4-element vectors that can be used as varyings. Each varying counts as at least one 4-element vector.'
+    description: 'The maximum number of 4-element vectors that can be used as varyings. Each varying counts as at least one 4-element vector.',
+    versions: [1, 2]
   },
   MAX_VERTEX_ATTRIBS: {
-    description: 'The maximum number of 4-element vectors that can be used as attributes to a vertex shader. Each attribute counts as at least one 4-element vector.'
+    description: 'The maximum number of 4-element vectors that can be used as attributes to a vertex shader. Each attribute counts as at least one 4-element vector.',
+    versions: [1, 2]
   },
   MAX_VERTEX_TEXTURE_IMAGE_UNITS: {
-    description: 'The maximum number of texture units that can be used by a vertex shader. The value may be 0 which indicates no vertex shader texturing support.'
+    description: 'The maximum number of texture units that can be used by a vertex shader. The value may be 0 which indicates no vertex shader texturing support.',
+    versions: [1, 2]
   },
   MAX_VERTEX_UNIFORM_VECTORS: {
-    description: 'The maximum number of 4-element vectors that can be passed as uniform to a vertex shader.  All uniforms are 4-element aligned, a single uniform counts at least as one 4-element vector. '
+    description: 'The maximum number of 4-element vectors that can be passed as uniform to a vertex shader.  All uniforms are 4-element aligned, a single uniform counts at least as one 4-element vector. ',
+    versions: [1, 2]
   },
   MAX_VIEWPORT_DIMS: {
-    description: 'The maximum viewport dimension (either width or height), that the viewport can be set to.'
+    description: 'The maximum viewport dimension (either width or height), that the viewport can be set to.',
+    versions: [1, 2]
   },
   SAMPLES: {
-    description: 'Indicates the coverage mask of the front framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.'
+    description: 'Indicates the coverage mask of the front framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.',
+    versions: [1, 2]
   },
   SAMPLE_BUFFERS: {
-    description: 'Indicates if a sample buffer is associated with the front framebuffer, this indicates support for anti-aliasing and alpha to coverage support.'
+    description: 'Indicates if a sample buffer is associated with the front framebuffer, this indicates support for anti-aliasing and alpha to coverage support.',
+    versions: [1, 2]
   },
   STENCIL_BITS: {
-    description: 'The number of bits of the front framebuffer usable for stenciling.'
+    description: 'The number of bits of the front framebuffer usable for stenciling.',
+    versions: [1, 2]
   },
   SUBPIXEL_BITS: {
-    description: 'The bit-precision used to position primitives in window coordinates.'
+    description: 'The bit-precision used to position primitives in window coordinates.',
+    versions: [1, 2]
+  },
+  MAX_3D_TEXTURE_SIZE: {
+    description: 'The largest 3D texture size (width, height or depth) that can be created. Note that VRAM may not allow a texture of any given size, it just expresses hardware/driver support for a given size.',
+    versions: [2]
+  },
+  MAX_ARRAY_TEXTURE_LAYERS: {
+    description: 'The maximum amount of texture layers an array texture can hold.',
+    versions: [2]
+  },
+  MAX_COLOR_ATTACHMENTS: {
+    description: 'The maximum number of color attachments that a framebuffer object support. ',
+    versions: [2]
+  },
+  MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS: {
+    description: 'The maximum amount 4-byte components allowable in fragment shader uniform blocks.',
+    versions: [2]
+  },
+  MAX_COMBINED_UNIFORM_BLOCKS: {
+    description: 'The maximum of uniform blocks allowed per program.',
+    versions: [2]
+  },
+  MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS: {
+    description: 'The maximum of of 4-byte components allowable in vertex shader uniform blocks.',
+    versions: [2]
+  },
+  MAX_DRAW_BUFFERS: {
+    description: 'The maximum amount of simultaneous outputs that may be written in a fragment shader.',
+    versions: [2]
+  },
+  MAX_ELEMENT_INDEX: {
+    description: 'The maximum index value usable for an indexed vertex array.',
+    versions: [2]
+  },
+  MAX_ELEMENTS_INDICES: {
+    description: 'The maximum amount of indices that can be used with an indexed vertex array. ',
+    versions: [2]
+  },
+  MAX_ELEMENTS_VERTICES: {
+    description: 'The maximum amount of vertex array vertices that\'s recommended.',
+    versions: [2]
+  },
+  MAX_FRAGMENT_INPUT_COMPONENTS: {
+    description: 'The maximum amount of inputs for a fragment shader.',
+    versions: [2]
+  },
+  MAX_FRAGMENT_UNIFORM_BLOCKS: {
+    description: 'The maximum amount of uniform blocks alowable for a fragment shader.',
+    versions: [2]
+  },
+  MAX_FRAGMENT_UNIFORM_COMPONENTS: {
+    description: 'The maximum amount of of floats, integers or bools that can be in uniform storage for fragment shaders.',
+    versions: [2]
+  },
+  MAX_PROGRAM_TEXEL_OFFSET: {
+    description: 'The maximum alowable texel offset in texture lookups.',
+    versions: [2]
+  },
+  MAX_SAMPLES: {
+    description: 'Idicates the maximum supported number of samples for multisampling.',
+    versions: [2]
+  },
+  MAX_SERVER_WAIT_TIMEOUT: {
+    description: 'The maximum glWaitSync timeout interval.',
+    versions: [2]
+  },
+  MAX_TEXTURE_LOD_BIAS: {
+    description: 'The maximum supported texture lookup LOD bias.',
+    versions: [2]
+  },
+  MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS: {
+    description: 'The maximum number of components writable in interleaved feedback buffer mode.',
+    versions: [2]
+  },
+  MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS: {
+    description: 'The maximum number of attributes or outputs which is supported for capture in separate transform feedback mode.',
+    versions: [2]
+  },
+  MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS: {
+    description: 'The maximum number of components per attribute which is supported in separate transform feedback mode.',
+    versions: [2]
+  },
+  MAX_UNIFORM_BLOCK_SIZE: {
+    description: 'The maximum size of a uniform block in 4-byte units.',
+    versions: [2]
+  },
+  MAX_UNIFORM_BUFFER_BINDINGS: {
+    description: 'The maximum number of simultaneously usable uniform blocks.',
+    versions: [2]
+  },
+  MAX_VARYING_COMPONENTS: {
+    description: 'The maximum number of 4-component vectors usable for varyings.',
+    versions: [2]
+  },
+  MAX_VERTEX_OUTPUT_COMPONENTS: {
+    description: 'The maximum number of 4-component vectors that a vertex shader can write. ',
+    versions: [2]
+  },
+  MAX_VERTEX_UNIFORM_BLOCKS: {
+    description: 'The maximum number of uniform blocks per vertex shader.',
+    versions: [2]
+  },
+  MAX_VERTEX_UNIFORM_COMPONENTS: {
+    description: 'The maximum number of floats, integers or booleans that can be in storage for a vertex shader.',
+    versions: [2]
+  },
+  MIN_PROGRAM_TEXEL_OFFSET: {
+    description: 'The minimum texel offset for texture lookups.',
+    versions: [2]
   }
 };
 
-names = ['ALIASED_LINE_WIDTH_RANGE', 'ALIASED_POINT_SIZE_RANGE', 'DEPTH_BITS', 'MAX_COMBINED_TEXTURE_IMAGE_UNITS', 'MAX_CUBE_MAP_TEXTURE_SIZE', 'MAX_FRAGMENT_UNIFORM_VECTORS', 'MAX_RENDERBUFFER_SIZE', 'MAX_TEXTURE_IMAGE_UNITS', 'MAX_TEXTURE_SIZE', 'MAX_VARYING_VECTORS', 'MAX_VERTEX_ATTRIBS', 'MAX_VERTEX_TEXTURE_IMAGE_UNITS', 'MAX_VERTEX_UNIFORM_VECTORS', 'MAX_VIEWPORT_DIMS', 'SAMPLES', 'SAMPLE_BUFFERS', 'STENCIL_BITS', 'SUBPIXEL_BITS'];
+
+/*
+names = [
+    'ALIASED_LINE_WIDTH_RANGE'
+    'ALIASED_POINT_SIZE_RANGE'
+    'DEPTH_BITS'
+    'MAX_COMBINED_TEXTURE_IMAGE_UNITS'
+    'MAX_CUBE_MAP_TEXTURE_SIZE'
+    'MAX_FRAGMENT_UNIFORM_VECTORS'
+    'MAX_RENDERBUFFER_SIZE'
+    'MAX_TEXTURE_IMAGE_UNITS'
+    'MAX_TEXTURE_SIZE'
+    'MAX_VARYING_VECTORS'
+    'MAX_VERTEX_ATTRIBS'
+    'MAX_VERTEX_TEXTURE_IMAGE_UNITS'
+    'MAX_VERTEX_UNIFORM_VECTORS'
+    'MAX_VIEWPORT_DIMS'
+    'SAMPLES'
+    'SAMPLE_BUFFERS'
+    'STENCIL_BITS'
+    'SUBPIXEL_BITS'
+]
+ */
 
 fieldNames = {
   MAX_VIEWPORT_DIMS: 'MAX_VIEWPORT_DIMS.width',
@@ -324,9 +486,29 @@ fieldNames = {
 
 exports.index = Parameters = (function() {
   function Parameters(filter, search) {
+    var entry, name;
     this.filter = filter;
-    this.nav = new NavlistExpand('#parameter', 'parameter', names);
-    this.buildSearch(search);
+    this.webgl1 = [];
+    this.webgl2 = [];
+    for (name in info) {
+      entry = info[name];
+      if (indexOf.call(entry.versions, 1) >= 0) {
+        this.webgl1.push({
+          name: name,
+          label: name
+        });
+      }
+      if (indexOf.call(entry.versions, 2) >= 0) {
+        this.webgl2.push({
+          name: name,
+          label: name
+        });
+      }
+    }
+    this.webgl1.sort();
+    this.webgl2.sort();
+    this.nav1 = new NavlistExpand('#parameter-webgl1', 'webgl/parameter', this.webgl1);
+    this.nav2 = new NavlistExpand('#parameter-webgl2', 'webgl2/parameter', this.webgl2);
   }
 
   Parameters.prototype.buildSearch = function(search) {
@@ -344,37 +526,53 @@ exports.index = Parameters = (function() {
     return results;
   };
 
-  Parameters.prototype.show = function(name, pageload) {
-    var col, full, row, widget;
-    this.nav.activate(name, pageload);
+  Parameters.prototype.show = function(webglVersion, name, pageload) {
+    var col, full, i, len, ref1, row, version, widget;
+    switch (webglVersion) {
+      case 'webgl1':
+        this.nav1.activate(name, pageload);
+        break;
+      case 'webgl2':
+        this.nav2.activate(name, pageload);
+    }
     row = $('<div class="row responsive"></div>').appendTo('main');
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1></h1>').text(name).appendTo(widget);
-    $('<div></div>').append(info[name].description).appendTo(widget);
+    $('<p></p>').append(info[name].description).appendTo(widget);
+    ref1 = info[name].versions;
+    for (i = 0, len = ref1.length; i < len; i++) {
+      version = ref1[i];
+      $('<span class="tag"></span>').text("WebGL " + version).appendTo(widget);
+    }
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1>Support (30 days)</h1>').appendTo(widget);
-    this.barchart(name).appendTo(widget);
+    this.barchart(webglVersion, name).appendTo(widget);
     full = $('<div class="full box"></div>').appendTo('main');
-    return this.series(name).appendTo(full);
+    return this.series(webglVersion, name).appendTo(full);
   };
 
-  Parameters.prototype.overview = function() {
-    var container, flow, i, len, name, results;
+  Parameters.prototype.overview = function(webglVersion) {
+    var collection, container, entry, flow, i, len, results;
     flow = $('<div class="flow box"></div>').appendTo('main');
     $('<h1>Parameters</h1>').appendTo(flow);
+    if (webglVersion === 'webgl1') {
+      collection = this.webgl1;
+    } else if (webglVersion === 'webgl2') {
+      collection = this.webgl2;
+    }
     results = [];
-    for (i = 0, len = names.length; i < len; i++) {
-      name = names[i];
+    for (i = 0, len = collection.length; i < len; i++) {
+      entry = collection[i];
       container = $('<div></div>').appendTo(flow);
-      this.chart(name).appendTo(container);
-      results.push($('<a class="label"></a>').attr('href', "/webgl/parameter/" + name).text(name).appendTo(container));
+      this.chart(webglVersion, entry.name).appendTo(container);
+      results.push($('<a class="label"></a>').attr('href', "/webgl/parameter/" + entry.name).text(entry.label).appendTo(container));
     }
     return results;
   };
 
-  Parameters.prototype.series = function(name) {
+  Parameters.prototype.series = function(webglVersion, name) {
     var chart, fieldName;
     if (fieldNames[name] != null) {
       fieldName = "webgl.params." + fieldNames[name];
@@ -396,6 +594,7 @@ exports.index = Parameters = (function() {
           query.filterBy.platform = _this.filter.platforms;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
@@ -436,7 +635,7 @@ exports.index = Parameters = (function() {
     return $(chart.elem);
   };
 
-  Parameters.prototype.barchart = function(name) {
+  Parameters.prototype.barchart = function(webglVersion, name) {
     var chart, fieldName;
     if (fieldNames[name] != null) {
       fieldName = "webgl.params." + fieldNames[name];
@@ -458,6 +657,7 @@ exports.index = Parameters = (function() {
           query.filterBy.platform = _this.filter.platforms;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             var keys, values;
@@ -475,7 +675,7 @@ exports.index = Parameters = (function() {
     return chart.elem;
   };
 
-  Parameters.prototype.chart = function(name) {
+  Parameters.prototype.chart = function(webglVersion, name) {
     var container, fieldName;
     if (fieldNames[name] != null) {
       fieldName = "webgl.params." + fieldNames[name];
@@ -485,6 +685,7 @@ exports.index = Parameters = (function() {
     container = $('<div></div>');
     db.execute({
       query: {
+        db: webglVersion,
         filterBy: {
           webgl: true
         },
@@ -542,55 +743,47 @@ exports.index = Main = (function() {
     this.filter = filter;
     this.gauge = bind(this.gauge, this);
     behavior.activatable(this);
-    search.add({
-      id: '/',
-      titles: 'WebGL Support',
-      body: this.info($('<div></div>')).text(),
-      type: 'Overview',
-      gauge: this.gauge
-    });
   }
 
-  Main.prototype.info = function(parent) {
-    $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(parent);
-    $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(parent);
-    $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot;\n    defer async&gt;&lt;/script&gt;</pre>').appendTo(parent);
-    $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(parent);
-    return parent;
+  Main.prototype.showInfo = function() {
+    var widget;
+    widget = $('<div class="full box"></div>').appendTo('main');
+    $('<h1>WebGL Stats</h1>').appendTo(widget);
+    $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(widget);
+    $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(widget);
+    $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot; defer async&gt;&lt;/script&gt;</pre>').appendTo(widget);
+    return $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(widget);
   };
 
-  Main.prototype.show = function() {
-    var col, row, smallCharts, widget;
+  Main.prototype.show = function(webglVersion) {
+    var col, mainRow, row, smallCharts, widget;
     behavior.deactivate();
     behavior.collapse(this);
-    row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
-    col = $('<div></div>').appendTo(row);
+    mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
+    col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>WebGL</h1>').appendTo(widget);
-    this.info(widget);
-    col = $('<div></div>').appendTo(row);
-    widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Support (30 days)</h1>').appendTo(widget);
+    $('<h1>Support (30 days)</h1>').text(util.versionLabel(webglVersion) + ' Support (30 days)').appendTo(widget);
     row = $('<div class="row center"></div>').appendTo(widget);
     col = $('<div></div>').appendTo(row);
-    this.gauge('large', 'All').appendTo(col);
+    this.gauge(webglVersion, 'large', 'All').appendTo(col);
     smallCharts = $('<div></div>').appendTo(row);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge('small', 'Desktop', 'desktop').appendTo(col);
+    this.gauge(webglVersion, 'small', 'Desktop', 'desktop').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    this.gauge('small', 'Smartphone', 'smartphone').appendTo(col);
+    this.gauge(webglVersion, 'small', 'Smartphone', 'smartphone').appendTo(col);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge('small', 'Tablet', 'tablet').appendTo(col);
+    this.gauge(webglVersion, 'small', 'Tablet', 'tablet').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    this.gauge('small', 'Console', 'game_console').appendTo(col);
-    widget = $('<div class="full box"></div>').appendTo('main');
-    $('<h1>WebGL Support</h1>').appendTo(widget);
-    return this.series().appendTo(widget);
+    this.gauge(webglVersion, 'small', 'Console', 'game_console').appendTo(col);
+    col = $('<div></div>').appendTo(mainRow);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1></h1>').text(util.versionLabel(webglVersion) + ' Support').appendTo(widget);
+    return this.series(webglVersion).appendTo(widget);
   };
 
-  Main.prototype.gauge = function(size, label, device) {
+  Main.prototype.gauge = function(webglVersion, size, label, device) {
     var chart, query;
     if (size == null) {
       size = 'small';
@@ -622,6 +815,7 @@ exports.index = Main = (function() {
           delete query.filterBy.platform;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             var percentage;
@@ -636,7 +830,7 @@ exports.index = Main = (function() {
     return chart.elem;
   };
 
-  Main.prototype.series = function() {
+  Main.prototype.series = function(webglVersion) {
     var chart;
     chart = new Series();
     this.filter.onChange(chart.elem, (function(_this) {
@@ -652,6 +846,7 @@ exports.index = Main = (function() {
           };
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             return chart.update(result.values);
@@ -727,11 +922,14 @@ completeRequest = function() {
 };
 
 exports.execute = function(arg) {
-  var query, success;
-  query = arg.query, success = arg.success;
+  var db, query, success;
+  db = arg.db, query = arg.query, success = arg.success;
+  if (db == null) {
+    db = 'webgl1';
+  }
   startRequest();
   return $.post({
-    url: 'https://data.webglstats.com/webgl1',
+    url: "https://data.webglstats.com/" + db,
     data: JSON.stringify(query),
     dataType: 'json',
     success: (function(_this) {
@@ -782,7 +980,7 @@ exports.index = NavlistExpand = (function() {
       name = name.name;
     }
     li = $('<li></li>').appendTo(this.list);
-    $('<a></a>').appendTo(li).text(label).attr('href', "/webgl/" + this.prefix + "/" + name);
+    $('<a></a>').appendTo(li).text(label).attr('href', "/" + this.prefix + "/" + name);
     return this.entries[name] = li;
   };
 
@@ -2196,6 +2394,20 @@ exports.formatNumber = function(n) {
 exports.capitalize = function(s) {
   return s[0].toUpperCase() + s.slice(1);
 };
+
+exports.versionPath = function(webglVersion) {
+  return {
+    webgl1: 'webgl',
+    webgl2: 'webgl2'
+  }[webglVersion];
+};
+
+exports.versionLabel = function(webglVersion) {
+  return {
+    webgl1: 'WebGL 1',
+    webgl2: 'WebGL 2'
+  }[webglVersion];
+};
 });
 moduleManager.module('/views/behavior', function(exports,sys){
 var activatables, collapsables;
@@ -2303,91 +2515,6 @@ exports.index = Search = (function() {
   };
 
   return Search;
-
-})();
-});
-moduleManager.module('/chart/donut', function(exports,sys){
-var Donut, colors;
-
-colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
-
-exports.index = Donut = (function() {
-  function Donut(options) {
-    var canvas, ref, ref1;
-    if (options == null) {
-      options = {};
-    }
-    this.width = (ref = options.width) != null ? ref : 160;
-    this.height = (ref1 = options.height) != null ? ref1 : 160;
-    this.elem = $('<div class="donut"></div>');
-    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
-    canvas.width = this.width;
-    canvas.height = this.height;
-    this.ctx = canvas.getContext('2d');
-    this.legend = $('<div></div>').appendTo(this.elem);
-  }
-
-  Donut.prototype.update = function(values) {
-    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
-    values.sort(function(a, b) {
-      return b.value - a.value;
-    });
-    values = values.filter(function(entry) {
-      return entry.value > 0;
-    });
-    this.legend.empty();
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    total = 0;
-    for (i = 0, len = values.length; i < len; i++) {
-      entry = values[i];
-      total += entry.value;
-    }
-    start = 0;
-    results = [];
-    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
-      entry = values[n];
-      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
-      color = "rgb(" + r + "," + g + "," + b + ")";
-      end = start + entry.value / total;
-      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
-      this.segment(start, end, color);
-      this.separator(end);
-      results.push(start = end);
-    }
-    return results;
-  };
-
-  Donut.prototype.separator = function(pos) {
-    var a, cx, cy, r1, r2, x1, x2, y1, y2;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    a = Math.PI * 2 * pos - Math.PI / 2;
-    cx = this.width / 2;
-    cy = this.height / 2;
-    x1 = cx + Math.cos(a) * r1;
-    y1 = cy + Math.sin(a) * r1;
-    x2 = cx + Math.cos(a) * r2;
-    y2 = cy + Math.sin(a) * r2;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x1, y1);
-    this.ctx.lineTo(x2, y2);
-    return this.ctx.stroke();
-  };
-
-  Donut.prototype.segment = function(start, end, color) {
-    var r1, r2;
-    start = Math.PI * 2 * start - Math.PI / 2;
-    end = Math.PI * 2 * end - Math.PI / 2;
-    this.ctx.fillStyle = color;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    this.ctx.beginPath();
-    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
-    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
-    return this.ctx.fill();
-  };
-
-  return Donut;
 
 })();
 });
@@ -2567,6 +2694,91 @@ exports.index = Traffic = (function() {
 
 })();
 });
+moduleManager.module('/chart/donut', function(exports,sys){
+var Donut, colors;
+
+colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
+
+exports.index = Donut = (function() {
+  function Donut(options) {
+    var canvas, ref, ref1;
+    if (options == null) {
+      options = {};
+    }
+    this.width = (ref = options.width) != null ? ref : 160;
+    this.height = (ref1 = options.height) != null ? ref1 : 160;
+    this.elem = $('<div class="donut"></div>');
+    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
+    canvas.width = this.width;
+    canvas.height = this.height;
+    this.ctx = canvas.getContext('2d');
+    this.legend = $('<div></div>').appendTo(this.elem);
+  }
+
+  Donut.prototype.update = function(values) {
+    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
+    values.sort(function(a, b) {
+      return b.value - a.value;
+    });
+    values = values.filter(function(entry) {
+      return entry.value > 0;
+    });
+    this.legend.empty();
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    total = 0;
+    for (i = 0, len = values.length; i < len; i++) {
+      entry = values[i];
+      total += entry.value;
+    }
+    start = 0;
+    results = [];
+    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
+      entry = values[n];
+      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
+      color = "rgb(" + r + "," + g + "," + b + ")";
+      end = start + entry.value / total;
+      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
+      this.segment(start, end, color);
+      this.separator(end);
+      results.push(start = end);
+    }
+    return results;
+  };
+
+  Donut.prototype.separator = function(pos) {
+    var a, cx, cy, r1, r2, x1, x2, y1, y2;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    a = Math.PI * 2 * pos - Math.PI / 2;
+    cx = this.width / 2;
+    cy = this.height / 2;
+    x1 = cx + Math.cos(a) * r1;
+    y1 = cy + Math.sin(a) * r1;
+    x2 = cx + Math.cos(a) * r2;
+    y2 = cy + Math.sin(a) * r2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    return this.ctx.stroke();
+  };
+
+  Donut.prototype.segment = function(start, end, color) {
+    var r1, r2;
+    start = Math.PI * 2 * start - Math.PI / 2;
+    end = Math.PI * 2 * end - Math.PI / 2;
+    this.ctx.fillStyle = color;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    this.ctx.beginPath();
+    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
+    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
+    return this.ctx.fill();
+  };
+
+  return Donut;
+
+})();
+});
 moduleManager.module('/views/extensions/index', function(exports,sys){
 var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, extensionLabel, info, ref, util,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -2593,16 +2805,34 @@ exports.index = Extensions = (function() {
     var meta, name, ref1;
     this.filter = filter;
     this.webgl1 = [];
+    this.webgl2 = [];
     for (name in info) {
       meta = info[name];
-      if ((indexOf.call(meta.versions, 1) >= 0) && ((ref1 = meta.status) === 'ratified' || ref1 === 'community')) {
-        this.webgl1.push({
-          name: name,
-          label: extensionLabel(name)
-        });
+      if ((ref1 = meta.status) === 'ratified' || ref1 === 'community') {
+        if (indexOf.call(meta.versions, 1) >= 0) {
+          this.webgl1.push({
+            name: name,
+            label: extensionLabel(name)
+          });
+        }
+        if (indexOf.call(meta.versions, 2) >= 0) {
+          this.webgl2.push({
+            name: name,
+            label: extensionLabel(name)
+          });
+        }
       }
     }
     this.webgl1.sort(function(a, b) {
+      if (a.label < b.label) {
+        return -1;
+      } else if (a.label > b.label) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    this.webgl2.sort(function(a, b) {
       if (a.label < b.label) {
         return -1;
       } else if (b.label > a.label) {
@@ -2611,8 +2841,8 @@ exports.index = Extensions = (function() {
         return 0;
       }
     });
-    this.nav = new NavlistExpand('#extension', 'extension', this.webgl1);
-    this.buildSearch(search);
+    this.nav1 = new NavlistExpand('#extension-webgl1', 'webgl/extension', this.webgl1);
+    this.nav2 = new NavlistExpand('#extension-webgl2', 'webgl2/extension', this.webgl2);
   }
 
   Extensions.prototype.buildSearch = function(search) {
@@ -2641,9 +2871,15 @@ exports.index = Extensions = (function() {
     return results;
   };
 
-  Extensions.prototype.show = function(name, pageload) {
+  Extensions.prototype.show = function(webglVersion, name, pageload) {
     var col, i, j, len, len1, meta, param, ref1, ref2, results, row, version, widget;
-    this.nav.activate(name, pageload);
+    switch (webglVersion) {
+      case 'webgl1':
+        this.nav1.activate(name, pageload);
+        break;
+      case 'webgl2':
+        this.nav2.activate(name, pageload);
+    }
     meta = info[name];
     row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(row);
@@ -2659,9 +2895,9 @@ exports.index = Extensions = (function() {
     $('<a>Specification</a>').attr('href', 'https://www.khronos.org/registry/webgl/extensions/' + name).appendTo(widget);
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
-    this.day30view(name, widget);
+    this.day30view(webglVersion, name, widget);
     widget = $('<div class="full box"></div>').appendTo('main');
-    this.series(name).appendTo(widget);
+    this.series(webglVersion, name).appendTo(widget);
     if (meta.params != null) {
       ref2 = meta.params;
       results = [];
@@ -2669,28 +2905,32 @@ exports.index = Extensions = (function() {
         param = ref2[j];
         widget = $('<div class="full box"></div>').appendTo('main');
         $('<h1></h1>').text(param).appendTo(widget);
-        results.push(this.stackedPercentage(name, param).appendTo(widget));
+        results.push(this.stackedPercentage(webglVersion, name, param).appendTo(widget));
       }
       return results;
     }
   };
 
-  Extensions.prototype.overview = function(pageload) {
-    var container, entry, flow, i, len, ref1, results;
+  Extensions.prototype.overview = function(webglVersion, pageload) {
+    var collection, container, entry, flow, i, len, results;
     flow = $('<div class="flow box"></div>').appendTo('main');
-    $('<h1>Extensions</h1>').appendTo(flow);
-    ref1 = this.webgl1;
+    $('<h1></h1>').text(util.versionLabel(webglVersion) + ' Extensions').appendTo(flow);
+    if (webglVersion === 'webgl1') {
+      collection = this.webgl1;
+    } else if (webglVersion === 'webgl2') {
+      collection = this.webgl2;
+    }
     results = [];
-    for (i = 0, len = ref1.length; i < len; i++) {
-      entry = ref1[i];
+    for (i = 0, len = collection.length; i < len; i++) {
+      entry = collection[i];
       container = $('<div></div>').appendTo(flow);
-      this.gauge(entry.name).appendTo(container);
+      this.gauge(webglVersion, entry.name).appendTo(container);
       results.push($('<a class="label"></a>').attr('href', "/webgl/extension/" + entry.name).text(entry.label).appendTo(container));
     }
     return results;
   };
 
-  Extensions.prototype.gauge = function(name, size, label, device) {
+  Extensions.prototype.gauge = function(webglVersion, name, size, label, device) {
     var chart, fieldName;
     if (size == null) {
       size = 'small';
@@ -2724,6 +2964,7 @@ exports.index = Extensions = (function() {
           query.filterBy.platform = _this.filter.platforms;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             var percentage;
@@ -2742,7 +2983,7 @@ exports.index = Extensions = (function() {
     return chart.elem;
   };
 
-  Extensions.prototype.series = function(name) {
+  Extensions.prototype.series = function(webglVersion, name) {
     var chart, fieldName;
     fieldName = "webgl.extensions." + name;
     chart = new Series();
@@ -2760,6 +3001,7 @@ exports.index = Extensions = (function() {
           query.filterBy.platform = _this.filter.platforms;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             return chart.update(result.values);
@@ -2770,7 +3012,7 @@ exports.index = Extensions = (function() {
     return chart.elem;
   };
 
-  Extensions.prototype.stackedPercentage = function(name, param) {
+  Extensions.prototype.stackedPercentage = function(webglVersion, name, param) {
     var chart, extname, fieldname;
     extname = "webgl.extensions." + name;
     fieldname = extname + "." + param;
@@ -2793,6 +3035,7 @@ exports.index = Extensions = (function() {
           query.filterBy.platform = _this.filter.platforms;
         }
         return db.execute({
+          db: webglVersion,
           query: query,
           success: function(result) {
             var data, i, item, j, keys, len, len1, ref1, ref2, value, valueStart, values, xLabels;
@@ -2833,23 +3076,23 @@ exports.index = Extensions = (function() {
     return $(chart.elem);
   };
 
-  Extensions.prototype.day30view = function(name, parent) {
+  Extensions.prototype.day30view = function(webglVersion, name, parent) {
     var col, row, smallCharts;
     $('<h1>Support (30 days)</h1>').appendTo(parent);
     row = $('<div class="row center"></div>').appendTo(parent);
     col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'large', 'All').appendTo(col);
+    this.gauge(webglVersion, name, 'large', 'All').appendTo(col);
     smallCharts = $('<div></div>').appendTo(row);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Desktop', 'desktop').appendTo(col);
+    this.gauge(webglVersion, name, 'small', 'Desktop', 'desktop').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Smartphone', 'smartphone').appendTo(col);
+    this.gauge(webglVersion, name, 'small', 'Smartphone', 'smartphone').appendTo(col);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge(name, 'small', 'Tablet', 'tablet').appendTo(col);
+    this.gauge(webglVersion, name, 'small', 'Tablet', 'tablet').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    return this.gauge(name, 'small', 'Console', 'game_console').appendTo(col);
+    return this.gauge(webglVersion, name, 'small', 'Console', 'game_console').appendTo(col);
   };
 
   return Extensions;
@@ -3036,12 +3279,12 @@ exports.index = {
       versions: [1,2]
    */
   EXT_color_buffer_float: {
-    description: '        ',
+    description: 'This extension allows to render into a floating point texture.',
     status: 'community',
     versions: [2]
   },
   EXT_disjoint_timer_query_webgl2: {
-    description: '        ',
+    description: 'This extension offers support for querying the execution time of commands on the GPU.',
     status: 'community',
     versions: [2]
   },

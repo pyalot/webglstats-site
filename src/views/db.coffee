@@ -40,10 +40,11 @@ completeRequest = ->
             clearTimeout(fadeOutTimeout)
         fadeOutTimeout = setTimeout(fadeOut, 1000)
 
-exports.execute = ({query, success}) ->
+exports.execute = ({db, query, success}) ->
+    db ?= 'webgl1'
     startRequest()
     $.post
-        url: 'https://data.webglstats.com/webgl1',
+        url: "https://data.webglstats.com/#{db}",
         data: JSON.stringify(query)
         dataType: 'json'
         success: (result) =>

@@ -34,3 +34,10 @@ exports.formatNumber = (n) ->
 exports.capitalize = (s) ->
     return s[0].toUpperCase() + s[1...]
 
+exports.versionPath = (webglVersion) ->
+    ({webgl1:'webgl', webgl2:'webgl2'})[webglVersion]
+
+exports.versionLabel = (webglVersion) ->
+    ({webgl1:'WebGL 1', webgl2:'WebGL 2'})[webglVersion]
+
+

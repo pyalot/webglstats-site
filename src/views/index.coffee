@@ -20,21 +20,28 @@ exports.index = class Views
     handle: (path, query, pageload=false) ->
         $('main').empty()
 
-        if path == '/'
-            @main.show(pageload)
-            @extensions.overview(pageload)
-            #@parameters.overview(pageload) #these charts are not really informative
-        else if path == '/search'
-            @search.show(query, pageload)
-        else if path == '/traffic'
-            @traffic.show()
-        else
-            path = path[1...]
-            parts = path.split('/')
-            console.assert parts.shift() == 'webgl'
-            category = parts.shift()
-            name = parts.shift()
+        switch path
+            when '/'
+                @main.showInfo()
+                @main.show('webgl1', pageload)
+                @main.show('webgl2', pageload)
+            when '/search'
+                @search.show(query, pageload)
+            when '/traffic'
+                @traffic.show()
+            when '/webgl'
+                @main.show('webgl1', pageload)
+                @extensions.overview('webgl1', pageload)
+            when '/webgl2'
+                @main.show('webgl2', pageload)
+                @extensions.overview('webgl2', pageload)
+            else
+                path = path[1...]
+                parts = path.split('/')
+                webglVersion = ({webgl:'webgl1', webgl2:'webgl2'})[parts.shift()]
+                category = parts.shift()
+                name = parts.shift()
 
-            switch category
-                when 'parameter' then @parameters.show(name, pageload)
-                when 'extension' then @extensions.show(name, pageload)
+                switch category
+                    when 'parameter' then @parameters.show(webglVersion, name, pageload)
+                    when 'extension' then @extensions.show(webglVersion, name, pageload)

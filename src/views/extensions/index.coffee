@@ -12,21 +12,33 @@ extensionLabel = (name) ->
 exports.index = class Extensions
     constructor: (@filter, search) ->
         @webgl1 = []
+        @webgl2 = []
         
         for name, meta of info
-            if (1 in meta.versions) and (meta.status in ['ratified', 'community'])
-                @webgl1.push
-                    name: name
-                    label: extensionLabel(name)
-
+            if meta.status in ['ratified', 'community']
+                if 1 in meta.versions
+                    @webgl1.push
+                        name: name
+                        label: extensionLabel(name)
+                if 2 in meta.versions
+                    @webgl2.push
+                        name: name
+                        label: extensionLabel(name)
+        
         @webgl1.sort (a,b) ->
-            if a.label < b.label then -1
-            else if b.label > a.label then 1
-            else 0
+            if a.label < b.label then return -1
+            else if a.label > b.label then return 1
+            else return 0
 
-        @nav = new NavlistExpand('#extension', 'extension', @webgl1)
+        @webgl2.sort (a,b) ->
+            if a.label < b.label then return -1
+            else if b.label > a.label then return 1
+            else return 0
 
-        @buildSearch(search)
+        @nav1 = new NavlistExpand('#extension-webgl1', 'webgl/extension', @webgl1)
+        @nav2 = new NavlistExpand('#extension-webgl2', 'webgl2/extension', @webgl2)
+
+        #@buildSearch(search)
     
     buildSearch: (search) ->
         for entry in @webgl1
@@ -45,8 +57,10 @@ exports.index = class Extensions
                     gauge: =>
                         @gauge(entry.name)
 
-    show: (name, pageload) ->
-        @nav.activate(name, pageload)
+    show: (webglVersion, name, pageload) ->
+        switch webglVersion
+            when 'webgl1' then @nav1.activate(name, pageload)
+            when 'webgl2' then @nav2.activate(name, pageload)
 
         meta = info[name]
 
@@ -88,12 +102,12 @@ exports.index = class Extensions
         widget = $('<div class="box"></div>')
             .appendTo(col)
 
-        @day30view(name, widget)
+        @day30view(webglVersion, name, widget)
 
         widget = $('<div class="full box"></div>')
             .appendTo('main')
 
-        @series(name)
+        @series(webglVersion, name)
             .appendTo(widget)
 
         if meta.params?
@@ -104,21 +118,27 @@ exports.index = class Extensions
                 $('<h1></h1>')
                     .text(param)
                     .appendTo(widget)
-                @stackedPercentage(name, param)
+                @stackedPercentage(webglVersion, name, param)
                     .appendTo(widget)
 
-    overview: (pageload) ->
+    overview: (webglVersion, pageload) ->
         flow = $('<div class="flow box"></div>')
             .appendTo('main')
 
-        $('<h1>Extensions</h1>')
+        $('<h1></h1>')
+            .text(util.versionLabel(webglVersion) + ' Extensions')
             .appendTo(flow)
 
-        for entry in @webgl1
+        if webglVersion == 'webgl1'
+            collection = @webgl1
+        else if webglVersion == 'webgl2'
+            collection = @webgl2
+
+        for entry in collection
             container = $('<div></div>')
                 .appendTo(flow)
 
-            @gauge(entry.name)
+            @gauge(webglVersion, entry.name)
                 .appendTo(container)
 
             $('<a class="label"></a>')
@@ -126,7 +146,7 @@ exports.index = class Extensions
                 .text(entry.label)
                 .appendTo(container)
 
-    gauge: (name, size='small', label=null, device=null) ->
+    gauge: (webglVersion, name, size='small', label=null, device=null) ->
         chart = new Gauge(label:label, size:size)
         
         fieldName = "webgl.extensions.#{name}"
@@ -146,6 +166,7 @@ exports.index = class Extensions
                 query.filterBy.platform = @filter.platforms
 
             db.execute
+                db: webglVersion
                 query: query
                 success: (result) ->
                     if result.total > 0
@@ -158,7 +179,7 @@ exports.index = class Extensions
         
         return chart.elem
 
-    series: (name) ->
+    series: (webglVersion, name) ->
         fieldName = "webgl.extensions.#{name}"
         
         chart = new Series()
@@ -174,13 +195,14 @@ exports.index = class Extensions
                 query.filterBy.platform = @filter.platforms
 
             db.execute
+                db: webglVersion
                 query: query
                 success: (result) ->
                     chart.update(result.values)
 
         return chart.elem
 
-    stackedPercentage: (name, param) ->
+    stackedPercentage: (webglVersion, name, param) ->
         extname = "webgl.extensions.#{name}"
         fieldname = "#{extname}.#{param}"
         chart = new StackedPercentage()
@@ -197,6 +219,7 @@ exports.index = class Extensions
                 query.filterBy.platform = @filter.platforms
 
             db.execute
+                db: webglVersion
                 query: query
                 success: (result) ->
                     keys = result.keys
@@ -228,7 +251,7 @@ exports.index = class Extensions
 
         return $(chart.elem)
 
-    day30view: (name, parent) ->
+    day30view: (webglVersion, name, parent) ->
         $('<h1>Support (30 days)</h1>')
             .appendTo(parent)
 
@@ -238,7 +261,7 @@ exports.index = class Extensions
         col = $('<div></div>')
             .appendTo(row)
 
-        @gauge(name, 'large', 'All')
+        @gauge(webglVersion, name, 'large', 'All')
             .appendTo(col)
 
         smallCharts = $('<div></div>')
@@ -248,17 +271,17 @@ exports.index = class Extensions
             .appendTo(smallCharts)
         
         col = $('<div></div>').appendTo(row)
-        @gauge(name, 'small', 'Desktop', 'desktop').appendTo(col)
+        @gauge(webglVersion, name, 'small', 'Desktop', 'desktop').appendTo(col)
         
         col = $('<div></div>').appendTo(row)
-        @gauge(name, 'small', 'Smartphone', 'smartphone').appendTo(col)
+        @gauge(webglVersion, name, 'small', 'Smartphone', 'smartphone').appendTo(col)
         
         row = $('<div class="row center"></div>')
             .appendTo(smallCharts)
         
         col = $('<div></div>').appendTo(row)
-        @gauge(name, 'small', 'Tablet', 'tablet').appendTo(col)
+        @gauge(webglVersion, name, 'small', 'Tablet', 'tablet').appendTo(col)
         
         col = $('<div></div>').appendTo(row)
-        @gauge(name, 'small', 'Console', 'game_console').appendTo(col)
+        @gauge(webglVersion, name, 'small', 'Console', 'game_console').appendTo(col)
 

@@ -34,7 +34,7 @@ exports.index = class NavlistExpand
         $('<a></a>')
             .appendTo(li)
             .text(label)
-            .attr('href', "/webgl/#{@prefix}/#{name}") #FIXME for webgl2
+            .attr('href', "/#{@prefix}/#{name}")
 
         @entries[name] = li
 
