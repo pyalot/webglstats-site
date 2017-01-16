@@ -2873,10 +2873,10 @@ exports.index = Extensions = (function() {
       titles: [entry.label, entry.name, entry.name.replace(/_/g, ' ')],
       body: meta.description,
       extra: meta.params != null ? meta.params.join(' ') : null,
-      type: (util.versionLabel(webglVersion)) + " Extension",
+      type: (util.versionLabel(version)) + " Extension",
       gauge: (function(_this) {
         return function() {
-          return _this.gauge(webglVersion, entry.name);
+          return _this.gauge(version, entry.name);
         };
       })(this)
     });

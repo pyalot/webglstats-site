@@ -57,9 +57,9 @@ exports.index = class Extensions
             ]
             body: meta.description
             extra: if meta.params? then meta.params.join(' ') else null
-            type: "#{util.versionLabel(webglVersion)} Extension"
+            type: "#{util.versionLabel(version)} Extension"
             gauge: =>
-                @gauge(webglVersion, entry.name)
+                @gauge(version, entry.name)
 
 
     show: (webglVersion, name, pageload) ->
