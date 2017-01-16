@@ -755,7 +755,8 @@ exports.index = Main = (function() {
     $('<p>\n    The statistics on this site help WebGL developers make decisions about hardware capabilities. \n</p>').appendTo(widget);
     $('<p>\n    If you want help collecting data just embedd the code below into your page.\n</p>').appendTo(widget);
     $('<pre>&lt;script src=&quot;//cdn.webglstats.com/stat.js&quot; defer async&gt;&lt;/script&gt;</pre>').appendTo(widget);
-    return $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(widget);
+    $('<p>\n    You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.\n</p>').appendTo(widget);
+    return $('<p>\n    <a href="http://webglreport.com/">WebGL Report</a> allows you to see the parameters your browser has implemented.\n</p>').appendTo(widget);
   };
 
   Main.prototype.show = function(webglVersion) {
@@ -823,7 +824,7 @@ exports.index = Main = (function() {
           success: function(result) {
             var percentage;
             percentage = result.values[1] / result.total;
-            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+            chart.setLabel(label + (" (" + (util.formatNumber(result.values[1])) + ")"));
             chart.update(percentage * 100);
             return chart.elem.removeClass('spinner');
           }
@@ -1784,7 +1785,7 @@ exports.index = Series = (function() {
           } else {
             value = 0;
           }
-          return "<span>" + item.name + " - " + (value.toFixed(0)) + "%<br/>(" + (util.formatNumber(item.total)) + " samples)</span>";
+          return "<span>" + item.name + " - " + (value.toFixed(0)) + "%<br/>(" + (util.formatNumber(item.values[1])) + ")</span>";
         } else {
           return "<span>" + item.name + " - " + (util.formatNumber(item.value)) + "</span>";
         }
@@ -2984,7 +2985,7 @@ exports.index = Extensions = (function() {
             } else {
               percentage = 0;
             }
-            chart.setLabel(label + (" (" + (util.formatNumber(result.total)) + ")"));
+            chart.setLabel(label + (" (" + (util.formatNumber(result.values[1])) + ")"));
             chart.update(percentage * 100);
             return chart.elem.removeClass('spinner');
           }

@@ -32,6 +32,10 @@ exports.index = class Main
             You can check out the code for this site on <a href="https://github.com/pyalot/webglstats-site">github</a>.
         </p>''').appendTo(widget)
 
+        $('''<p>
+            <a href="http://webglreport.com/">WebGL Report</a> allows you to see the parameters your browser has implemented.
+        </p>''').appendTo(widget)
+
     show: (webglVersion) ->
         behavior.deactivate()
         behavior.collapse(@)
@@ -103,7 +107,7 @@ exports.index = class Main
                 query: query
                 success: (result) ->
                     percentage = result.values[1]/result.total
-                    chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                    chart.setLabel(label + " (#{util.formatNumber(result.values[1])})")
                     chart.update(percentage*100)
                     chart.elem.removeClass('spinner')
 

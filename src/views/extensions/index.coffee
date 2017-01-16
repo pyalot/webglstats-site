@@ -178,7 +178,7 @@ exports.index = class Extensions
                         percentage = result.values[1]/result.total
                     else
                         percentage = 0
-                    chart.setLabel(label + " (#{util.formatNumber(result.total)})")
+                    chart.setLabel(label + " (#{util.formatNumber(result.values[1])})")
                     chart.update(percentage*100)
                     chart.elem.removeClass('spinner')
         

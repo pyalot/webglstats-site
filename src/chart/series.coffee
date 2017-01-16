@@ -48,6 +48,6 @@ exports.index = class Series
                         value = (item.values[1]/item.total)*100
                     else
                         value = 0
-                    return "<span>#{item.name} - #{value.toFixed(0)}%<br/>(#{util.formatNumber(item.total)} samples)</span>"
+                    return "<span>#{item.name} - #{value.toFixed(0)}%<br/>(#{util.formatNumber(item.values[1])})</span>"
                 else
                     return "<span>#{item.name} - #{util.formatNumber(item.value)}</span>"
