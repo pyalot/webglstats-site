@@ -768,6 +768,13 @@ main h1 {
   margin-bottom: 20px;
   text-align: center;
 }
+main label.caption {
+  display: block;
+  text-align: right;
+  position: relative;
+  top: 10px;
+  color: rgba(255, 255, 255, 0.25);
+}
 main > div.flow {
   border: 1px solid #252d35;
   border-radius: 5px;

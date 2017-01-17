@@ -28,7 +28,7 @@ exports.index =
         versions: [1.2]
     WEBGL_compressed_texture_atc:
         description: '''
-            Offers compressed texture format support for ATC.
+            Offers compressed texture format support for <a href="https://www.khronos.org/registry/gles/extensions/AMD/AMD_compressed_ATC_texture.txt">ATC</a>.
         '''
         status: 'community'
         versions: [1,2]
@@ -58,7 +58,7 @@ exports.index =
         versions: [1,2]
     WEBGL_depth_texture:
         description: '''
-            This extension offers the ability to create depth textures to attach to a framebuffer.
+            This extension offers the ability to create depth textures to attach to a framebuffer object.
         '''
         status: 'ratified'
         versions: [1]
@@ -70,7 +70,10 @@ exports.index =
         versions: [1,2]
     WEBGL_draw_buffers:
         description: '''
-            This extension allows a framebuffer to hold several textures to render to and a fragment shader to output to them.
+            This extension allows a framebuffer object to hold several
+            textures to render to and a fragment shader to output to them selectively.
+            <br/><br/> 
+            It is also known as <a href="https://en.wikipedia.org/wiki/Multiple_Render_Targets">multi render target (MRT)</a>.
         '''
         params: [
             'MAX_COLOR_ATTACHMENTS_WEBGL'
@@ -86,13 +89,15 @@ exports.index =
         versions: [1]
     EXT_frag_depth:
         description: '''
-            This extension allows a fragment shader to write the depth of a fragment.
+            This extension allows a fragment shader to write the depth of a fragment by assigning to the builtin gl_FragDepth.
         '''
         status: 'ratified'
         versions: [1]
     ANGLE_instanced_arrays:
         description: '''
             This extension offers the ability to repeat some vertex attributes, which can be used to render many instances of an object.
+            <br/><br/>
+            The technique is also known as <a href="https://en.wikipedia.org/wiki/Geometry_instancing">Geometry Instancing</a>.
         '''
         status: 'ratified'
         versions: [1]
@@ -104,13 +109,17 @@ exports.index =
         versions: [1,2]
     EXT_sRGB:
         description: '''
-            This extension offers a texture format whose internal storage is sRGB.
+            This extension offers a texture format with internal storage in sRGB.
+            <br/><br/>
+            Rendering should usually be performed in linear space
+            (see <a href="http://http.developer.nvidia.com/GPUGems3/gpugems3_ch24.html">the importance of being linear</a>).
+            Using this extension banding artifacts and incorrect blending outcomes can be avoided or mitgitated.
         '''
         status: 'community'
         versions: [1]
     EXT_shader_texture_lod:
         description: '''
-            This extension allows a texture lookup in a fragment shader to specify a LOD level explicitely.
+            Allows a fragment shader to specify the LOD level using the texture[2D,2DProj,Cube]LodEXT functions. Alternatively also allows to specify S/T derivatives by using the texture[2D,2DProj,Cube]GradEXT functions.
         '''
         status: 'ratified'
         versions: [1]
@@ -122,7 +131,7 @@ exports.index =
         versions: [1]
     EXT_texture_filter_anisotropic:
         description: '''
-            This extension allows textures to be filtered anisotropically.
+            This extension allows <a href="https://en.wikipedia.org/wiki/Anisotropic_filtering">anisotropic texture filtering</a>.
         '''
         params: [
             'MAX_TEXTURE_MAX_ANISOTROPY_EXT'
@@ -131,31 +140,31 @@ exports.index =
         versions: [1,2]
     OES_texture_float:
         description: '''
-            This extension offers basic support for 32-bit floating point textures.
+            Offers basic support for 32-bit floating point textures.
         '''
         status: 'ratified'
         versions: [1]
     OES_texture_float_linear:
         description: '''
-            This extension offers the ability to linearly filter 32-bit floating point textures.
+            Offers the ability to linearly filter 32-bit floating point textures.
         '''
         status: 'ratified'
         versions: [1,2]
     OES_texture_half_float:
         description: '''
-            This extension offers basic support for 16-bit floating point textures.
+            Offers basic support for 16-bit floating point textures.
         '''
         status: 'ratified'
         versions: [1]
     OES_texture_half_float_linear:
         description: '''
-            This extension offers the ability to linearly filter 16-bit floating point textures.
+            Offers the ability to linearly filter 16-bit floating point textures.
         '''
         status: 'ratified'
         versions: [1]
     OES_vertex_array_object:
         description: '''
-            This extension provides a way to group vertex attribute pointer configurations into an object for later use.
+            This extension provides a way to group vertex attribute pointer configurations into a vertex array object (VAO) for later use.
         '''
         status: 'ratified'
         versions: [1]
@@ -166,6 +175,7 @@ exports.index =
         versions: [1,2]
     WEBGL_compressed_texture_etc:
         description: '''
+            Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.
         '''
         status: 'community'
         versions: [1,2]

@@ -292,7 +292,7 @@ info = {
     versions: [1, 2]
   },
   DEPTH_BITS: {
-    description: 'The number of bits for the front depthbuffer. Bits may differ in case of a framebuffer.',
+    description: 'The number of bits for the default depthbuffer. Bits may differ in case of rendering to a framebuffer object.',
     versions: [1, 2]
   },
   MAX_COMBINED_TEXTURE_IMAGE_UNITS: {
@@ -300,7 +300,7 @@ info = {
     versions: [1, 2]
   },
   MAX_CUBE_MAP_TEXTURE_SIZE: {
-    description: 'The maximum size of one side of a cubemap.',
+    description: 'The maximum size of any side of a cubemap.',
     versions: [1, 2]
   },
   MAX_FRAGMENT_UNIFORM_VECTORS: {
@@ -308,7 +308,7 @@ info = {
     versions: [1, 2]
   },
   MAX_RENDERBUFFER_SIZE: {
-    description: 'The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer size.',
+    description: 'The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer object attached renderbuffer or texture size.',
     versions: [1, 2]
   },
   MAX_TEXTURE_IMAGE_UNITS: {
@@ -340,15 +340,15 @@ info = {
     versions: [1, 2]
   },
   SAMPLES: {
-    description: 'Indicates the coverage mask of the front framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.',
+    description: 'Indicates the coverage mask of the default framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.',
     versions: [1, 2]
   },
   SAMPLE_BUFFERS: {
-    description: 'Indicates if a sample buffer is associated with the front framebuffer, this indicates support for anti-aliasing and alpha to coverage support.',
+    description: 'Indicates if a sample buffer is associated with the default framebuffer, this indicates support for anti-aliasing and alpha to coverage support.',
     versions: [1, 2]
   },
   STENCIL_BITS: {
-    description: 'The number of bits of the front framebuffer usable for stenciling.',
+    description: 'The number of bits of the default framebuffer usable for stenciling.',
     versions: [1, 2]
   },
   SUBPIXEL_BITS: {
@@ -364,7 +364,7 @@ info = {
     versions: [2]
   },
   MAX_COLOR_ATTACHMENTS: {
-    description: 'The maximum number of color attachments that a framebuffer object support. ',
+    description: 'The maximum number of color attachments that a framebuffer object supports. ',
     versions: [2]
   },
   MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS: {
@@ -372,7 +372,7 @@ info = {
     versions: [2]
   },
   MAX_COMBINED_UNIFORM_BLOCKS: {
-    description: 'The maximum of uniform blocks allowed per program.',
+    description: 'The maximum amount of uniform blocks allowed per program.',
     versions: [2]
   },
   MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS: {
@@ -380,7 +380,7 @@ info = {
     versions: [2]
   },
   MAX_DRAW_BUFFERS: {
-    description: 'The maximum amount of simultaneous outputs that may be written in a fragment shader.',
+    description: 'The maximum amount of simultaneous outputs that may be written in a fragment shader. This is used for <a href="https://en.wikipedia.org/wiki/Multiple_Render_Targets">multi render targets (MRT)</a>.',
     versions: [2]
   },
   MAX_ELEMENT_INDEX: {
@@ -412,7 +412,7 @@ info = {
     versions: [2]
   },
   MAX_SAMPLES: {
-    description: 'Idicates the maximum supported number of samples for multisampling.',
+    description: 'Idicates the maximum supported size for multisampling. For instance 4 would indicate a maximum size of 4x4 <a href="https://en.wikipedia.org/wiki/Multisample_anti-aliasing">MSAA</a>.',
     versions: [2]
   },
   MAX_SERVER_WAIT_TIMEOUT: {
@@ -3265,7 +3265,7 @@ exports.index = {
     versions: [1.2]
   },
   WEBGL_compressed_texture_atc: {
-    description: 'Offers compressed texture format support for ATC.',
+    description: 'Offers compressed texture format support for <a href="https://www.khronos.org/registry/gles/extensions/AMD/AMD_compressed_ATC_texture.txt">ATC</a>.',
     status: 'community',
     versions: [1, 2]
   },
@@ -3290,7 +3290,7 @@ exports.index = {
     versions: [1, 2]
   },
   WEBGL_depth_texture: {
-    description: 'This extension offers the ability to create depth textures to attach to a framebuffer.',
+    description: 'This extension offers the ability to create depth textures to attach to a framebuffer object.',
     status: 'ratified',
     versions: [1]
   },
@@ -3300,7 +3300,7 @@ exports.index = {
     versions: [1, 2]
   },
   WEBGL_draw_buffers: {
-    description: 'This extension allows a framebuffer to hold several textures to render to and a fragment shader to output to them.',
+    description: 'This extension allows a framebuffer object to hold several\ntextures to render to and a fragment shader to output to them selectively.\n<br/><br/> \nIt is also known as <a href="https://en.wikipedia.org/wiki/Multiple_Render_Targets">multi render target (MRT)</a>.',
     params: ['MAX_COLOR_ATTACHMENTS_WEBGL', 'MAX_DRAW_BUFFERS_WEBGL'],
     status: 'ratified',
     versions: [1]
@@ -3311,12 +3311,12 @@ exports.index = {
     versions: [1]
   },
   EXT_frag_depth: {
-    description: 'This extension allows a fragment shader to write the depth of a fragment.',
+    description: 'This extension allows a fragment shader to write the depth of a fragment by assigning to the builtin gl_FragDepth.',
     status: 'ratified',
     versions: [1]
   },
   ANGLE_instanced_arrays: {
-    description: 'This extension offers the ability to repeat some vertex attributes, which can be used to render many instances of an object.',
+    description: 'This extension offers the ability to repeat some vertex attributes, which can be used to render many instances of an object.\n<br/><br/>\nThe technique is also known as <a href="https://en.wikipedia.org/wiki/Geometry_instancing">Geometry Instancing</a>.',
     status: 'ratified',
     versions: [1]
   },
@@ -3326,12 +3326,12 @@ exports.index = {
     versions: [1, 2]
   },
   EXT_sRGB: {
-    description: 'This extension offers a texture format whose internal storage is sRGB.',
+    description: 'This extension offers a texture format with internal storage in sRGB.\n<br/><br/>\nRendering should usually be performed in linear space\n(see <a href="http://http.developer.nvidia.com/GPUGems3/gpugems3_ch24.html">the importance of being linear</a>).\nUsing this extension banding artifacts and incorrect blending outcomes can be avoided or mitgitated.',
     status: 'community',
     versions: [1]
   },
   EXT_shader_texture_lod: {
-    description: 'This extension allows a texture lookup in a fragment shader to specify a LOD level explicitely.',
+    description: 'Allows a fragment shader to specify the LOD level using the texture[2D,2DProj,Cube]LodEXT functions. Alternatively also allows to specify S/T derivatives by using the texture[2D,2DProj,Cube]GradEXT functions.',
     status: 'ratified',
     versions: [1]
   },
@@ -3341,33 +3341,33 @@ exports.index = {
     versions: [1]
   },
   EXT_texture_filter_anisotropic: {
-    description: 'This extension allows textures to be filtered anisotropically.',
+    description: 'This extension allows <a href="https://en.wikipedia.org/wiki/Anisotropic_filtering">anisotropic texture filtering</a>.',
     params: ['MAX_TEXTURE_MAX_ANISOTROPY_EXT'],
     status: 'ratified',
     versions: [1, 2]
   },
   OES_texture_float: {
-    description: 'This extension offers basic support for 32-bit floating point textures.',
+    description: 'Offers basic support for 32-bit floating point textures.',
     status: 'ratified',
     versions: [1]
   },
   OES_texture_float_linear: {
-    description: 'This extension offers the ability to linearly filter 32-bit floating point textures.',
+    description: 'Offers the ability to linearly filter 32-bit floating point textures.',
     status: 'ratified',
     versions: [1, 2]
   },
   OES_texture_half_float: {
-    description: 'This extension offers basic support for 16-bit floating point textures.',
+    description: 'Offers basic support for 16-bit floating point textures.',
     status: 'ratified',
     versions: [1]
   },
   OES_texture_half_float_linear: {
-    description: 'This extension offers the ability to linearly filter 16-bit floating point textures.',
+    description: 'Offers the ability to linearly filter 16-bit floating point textures.',
     status: 'ratified',
     versions: [1]
   },
   OES_vertex_array_object: {
-    description: 'This extension provides a way to group vertex attribute pointer configurations into an object for later use.',
+    description: 'This extension provides a way to group vertex attribute pointer configurations into a vertex array object (VAO) for later use.',
     status: 'ratified',
     versions: [1]
   },
@@ -3377,7 +3377,7 @@ exports.index = {
     versions: [1, 2]
   },
   WEBGL_compressed_texture_etc: {
-    description: '        ',
+    description: 'Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.',
     status: 'community',
     versions: [1, 2]
   },

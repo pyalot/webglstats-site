@@ -16,7 +16,7 @@ info =
         versions: [1,2]
     DEPTH_BITS:
         description: '''
-            The number of bits for the front depthbuffer. Bits may differ in case of a framebuffer.
+            The number of bits for the default depthbuffer. Bits may differ in case of rendering to a framebuffer object.
         '''
         versions: [1,2]
     MAX_COMBINED_TEXTURE_IMAGE_UNITS:
@@ -27,7 +27,7 @@ info =
         versions: [1,2]
     MAX_CUBE_MAP_TEXTURE_SIZE:
         description: '''
-            The maximum size of one side of a cubemap.
+            The maximum size of any side of a cubemap.
         '''
         versions: [1,2]
     MAX_FRAGMENT_UNIFORM_VECTORS:
@@ -37,7 +37,7 @@ info =
         versions: [1,2]
     MAX_RENDERBUFFER_SIZE:
         description: '''
-            The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer size.
+            The largest renderbuffer that can be used. This limit indicates the maximum usable canvas size as well as the maximum usable framebuffer object attached renderbuffer or texture size.
         '''
         versions: [1,2]
     MAX_TEXTURE_IMAGE_UNITS:
@@ -77,17 +77,17 @@ info =
         versions: [1,2]
     SAMPLES:
         description: '''
-            Indicates the coverage mask of the front framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.
+            Indicates the coverage mask of the default framebuffer. This value affects anti-aliasing and depth to coverage. For instance a value of 4 would indicate a 4x4 mask.
         '''
         versions: [1,2]
     SAMPLE_BUFFERS:
         description: '''
-            Indicates if a sample buffer is associated with the front framebuffer, this indicates support for anti-aliasing and alpha to coverage support.
+            Indicates if a sample buffer is associated with the default framebuffer, this indicates support for anti-aliasing and alpha to coverage support.
         '''
         versions: [1,2]
     STENCIL_BITS:
         description: '''
-            The number of bits of the front framebuffer usable for stenciling.
+            The number of bits of the default framebuffer usable for stenciling.
         '''
         versions: [1,2]
     SUBPIXEL_BITS:
@@ -107,7 +107,7 @@ info =
         versions: [2]
     MAX_COLOR_ATTACHMENTS:
         description: '''
-            The maximum number of color attachments that a framebuffer object support. 
+            The maximum number of color attachments that a framebuffer object supports. 
         '''
         versions: [2]
     MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS:
@@ -117,7 +117,7 @@ info =
         versions: [2]
     MAX_COMBINED_UNIFORM_BLOCKS:
         description: '''
-            The maximum of uniform blocks allowed per program.
+            The maximum amount of uniform blocks allowed per program.
         '''
         versions: [2]
     MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS:
@@ -127,7 +127,7 @@ info =
         versions: [2]
     MAX_DRAW_BUFFERS:
         description: '''
-            The maximum amount of simultaneous outputs that may be written in a fragment shader.
+            The maximum amount of simultaneous outputs that may be written in a fragment shader. This is used for <a href="https://en.wikipedia.org/wiki/Multiple_Render_Targets">multi render targets (MRT)</a>.
         '''
         versions: [2]
     MAX_ELEMENT_INDEX:
@@ -167,7 +167,7 @@ info =
         versions: [2]
     MAX_SAMPLES:
         description: '''
-            Idicates the maximum supported number of samples for multisampling.
+            Idicates the maximum supported size for multisampling. For instance 4 would indicate a maximum size of 4x4 <a href="https://en.wikipedia.org/wiki/Multisample_anti-aliasing">MSAA</a>.
         '''
         versions: [2]
     MAX_SERVER_WAIT_TIMEOUT:
