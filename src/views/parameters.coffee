@@ -342,7 +342,7 @@ exports.index = class Parameters
         widget = $('<div class="box"></div>')
             .appendTo(col)
 
-        $('<h1>Support (30 days)</h1>')
+        $('<h1>Support (30d)</h1>')
             .appendTo(widget)
 
         @barchart(webglVersion, name).appendTo(widget)

@@ -571,7 +571,7 @@ exports.index = Parameters = (function() {
     }
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Support (30 days)</h1>').appendTo(widget);
+    $('<h1>Support (30d)</h1>').appendTo(widget);
     this.barchart(webglVersion, name).appendTo(widget);
     full = $('<div class="full box"></div>').appendTo('main');
     return this.series(webglVersion, name).appendTo(full);
@@ -747,7 +747,7 @@ exports.index = Parameters = (function() {
 })();
 });
 moduleManager.module('/views/main', function(exports,sys){
-var Gauge, Main, Parameters, Series, behavior, db, extensions, ref, util,
+var Donut, Gauge, Main, Parameters, Series, behavior, db, extensions, ref, util,
   bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 db = sys["import"]('db');
@@ -760,7 +760,7 @@ behavior = sys["import"]('behavior');
 
 Parameters = sys["import"]('parameters');
 
-ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series;
+ref = sys["import"]('/chart'), Donut = ref.Donut, Gauge = ref.Gauge, Series = ref.Series;
 
 exports.index = Main = (function() {
   function Main(filter, search) {
@@ -787,41 +787,59 @@ exports.index = Main = (function() {
     return $('<a></a>').attr('href', '/' + util.versionPath(webglVersion)).text(util.versionLabel(webglVersion)).appendTo(breadcrumbs).wrap('<li></li>');
   };
 
-  Main.prototype.show = function(webglVersion, breadcrumbs) {
-    var col, mainRow, row, smallCharts, versionLabel, widget;
+  Main.prototype.show = function(version, breadcrumbs) {
+    var mainRow, versionLabel;
     if (breadcrumbs == null) {
       breadcrumbs = true;
     }
     behavior.deactivate();
     behavior.collapse(this);
     if (breadcrumbs) {
-      this.breadcrumbs(webglVersion);
+      this.breadcrumbs(version);
       versionLabel = '';
     } else {
-      versionLabel = util.versionLabel(webglVersion) + ' ';
+      versionLabel = util.versionLabel(version) + ' ';
     }
     mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
-    col = $('<div></div>').appendTo(mainRow);
+    this.supportGauges(version, versionLabel, mainRow);
+    this.caveatDonut(version, versionLabel, mainRow);
+    return this.supportSeries(version, versionLabel);
+  };
+
+  Main.prototype.caveatDonut = function(version, versionLabel, parent) {
+    var col, widget;
+    col = $('<div></div>').appendTo(parent);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Support (30 days)</h1>').text(versionLabel + 'Support (30 days)').appendTo(widget);
+    $('<h1></h1>').text(versionLabel + 'Major Performance Caveat (30d)').appendTo(widget);
+    return this.donut(version, versionLabel).appendTo(widget);
+  };
+
+  Main.prototype.supportSeries = function(version, versionLabel) {
+    var widget;
+    widget = $('<div class="full box"></div>').appendTo('main');
+    $('<h1></h1>').text(versionLabel + 'Support').appendTo(widget);
+    return this.series(version).appendTo(widget);
+  };
+
+  Main.prototype.supportGauges = function(version, versionLabel, parent) {
+    var col, row, smallCharts, widget;
+    col = $('<div></div>').appendTo(parent);
+    widget = $('<div class="box"></div>').appendTo(col);
+    $('<h1>Support (30d)</h1>').text(versionLabel + 'Support (30d)').appendTo(widget);
     row = $('<div class="row center"></div>').appendTo(widget);
     col = $('<div></div>').appendTo(row);
-    this.gauge(webglVersion, 'large', 'All').appendTo(col);
+    this.gauge(version, 'large', 'All').appendTo(col);
     smallCharts = $('<div></div>').appendTo(row);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge(webglVersion, 'small', 'Desktop', 'desktop').appendTo(col);
+    this.gauge(version, 'small', 'Desktop', 'desktop').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    this.gauge(webglVersion, 'small', 'Smartphone', 'smartphone').appendTo(col);
+    this.gauge(version, 'small', 'Smartphone', 'smartphone').appendTo(col);
     row = $('<div class="row center"></div>').appendTo(smallCharts);
     col = $('<div></div>').appendTo(row);
-    this.gauge(webglVersion, 'small', 'Tablet', 'tablet').appendTo(col);
+    this.gauge(version, 'small', 'Tablet', 'tablet').appendTo(col);
     col = $('<div></div>').appendTo(row);
-    this.gauge(webglVersion, 'small', 'Console', 'game_console').appendTo(col);
-    col = $('<div></div>').appendTo(mainRow);
-    widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1></h1>').text(versionLabel + 'Support').appendTo(widget);
-    return this.series(webglVersion).appendTo(widget);
+    return this.gauge(version, 'small', 'Console', 'game_console').appendTo(col);
   };
 
   Main.prototype.gauge = function(webglVersion, size, label, device) {
@@ -896,6 +914,54 @@ exports.index = Main = (function() {
       };
     })(this));
     return chart.elem;
+  };
+
+  Main.prototype.donut = function(version, versionLabel) {
+    var chart;
+    chart = new Donut();
+    this.filter.onChange(chart.elem, (function(_this) {
+      return function() {
+        var query;
+        chart.elem.addClass('spinner');
+        query = {
+          filterBy: {
+            webgl: true
+          },
+          bucketBy: 'webgl.majorPerformanceCaveat',
+          start: -30
+        };
+        if (_this.filter.platforms != null) {
+          query.filterBy.platform = _this.filter.platforms;
+        }
+        return db.execute({
+          db: version,
+          query: query,
+          success: function(result) {
+            var label, n, value, values;
+            chart.elem.removeClass('spinner');
+            values = (function() {
+              var i, len, ref1, results;
+              ref1 = result.keys;
+              results = [];
+              for (n = i = 0, len = ref1.length; i < len; n = ++i) {
+                label = ref1[n];
+                if (label == null) {
+                  label = 'Unknown';
+                }
+                value = result.values[n];
+                results.push({
+                  label: util.capitalize(label.replace(/_/g, ' ')) + (" " + ((value * 100 / result.total).toFixed(1)) + "% (" + (util.formatNumber(value)) + ")"),
+                  value: result.values[n]
+                });
+              }
+              return results;
+            })();
+            return chart.update(values);
+          }
+        });
+      };
+    })(this));
+    return $(chart.elem);
   };
 
   Main.prototype.deactivate = function() {
@@ -2603,16 +2669,16 @@ exports.index = Traffic = (function() {
     this.series().appendTo(widget);
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Platform (30 days)</h1>').appendTo(widget);
+    $('<h1>Platform (30d)</h1>').appendTo(widget);
     this.donut('useragent.device').appendTo(widget);
     mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Operating System (30 days)</h1>').appendTo(widget);
+    $('<h1>Operating System (30d)</h1>').appendTo(widget);
     this.donut('useragent.os').appendTo(widget);
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Browser (30 days)</h1>').appendTo(widget);
+    $('<h1>Browser (30d)</h1>').appendTo(widget);
     this.donut('useragent.family').appendTo(widget);
     full = $('<div class="full box"></div>').appendTo('main');
     $('<h1>Platform</h1>').appendTo(full);
@@ -3153,7 +3219,7 @@ exports.index = Extensions = (function() {
 
   Extensions.prototype.day30view = function(webglVersion, name, parent) {
     var col, row, smallCharts;
-    $('<h1>Support (30 days)</h1>').appendTo(parent);
+    $('<h1>Support (30d)</h1>').appendTo(parent);
     row = $('<div class="row center"></div>').appendTo(parent);
     col = $('<div></div>').appendTo(row);
     this.gauge(webglVersion, name, 'large', 'All').appendTo(col);

@@ -283,7 +283,7 @@ exports.index = class Extensions
         return $(chart.elem)
 
     day30view: (webglVersion, name, parent) ->
-        $('<h1>Support (30 days)</h1>')
+        $('<h1>Support (30d)</h1>')
             .appendTo(parent)
 
         row = $('<div class="row center"></div>')

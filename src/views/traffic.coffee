@@ -47,7 +47,7 @@ exports.index = class Traffic
             .appendTo(mainRow)
         widget = $('<div class="box"></div>')
             .appendTo(col)
-        $('<h1>Platform (30 days)</h1>')
+        $('<h1>Platform (30d)</h1>')
             .appendTo(widget)
         @donut('useragent.device').appendTo(widget)
 
@@ -64,7 +64,7 @@ exports.index = class Traffic
         widget = $('<div class="box"></div>')
             .appendTo(col)
         
-        $('<h1>Operating System (30 days)</h1>')
+        $('<h1>Operating System (30d)</h1>')
             .appendTo(widget)
         
         @donut('useragent.os').appendTo(widget)
@@ -75,7 +75,7 @@ exports.index = class Traffic
         widget = $('<div class="box"></div>')
             .appendTo(col)
         
-        $('<h1>Browser (30 days)</h1>')
+        $('<h1>Browser (30d)</h1>')
             .appendTo(widget)
 
         @donut('useragent.family').appendTo(widget)

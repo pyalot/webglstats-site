@@ -3,7 +3,7 @@ extensions = sys.import 'extensions'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
 Parameters = sys.import 'parameters'
-{Gauge, Series} = sys.import '/chart'
+{Donut, Gauge, Series} = sys.import '/chart'
 
 exports.index = class Main
     constructor: (@filter, search) ->
@@ -52,59 +52,71 @@ exports.index = class Main
             .appendTo(breadcrumbs)
             .wrap('<li></li>')
 
-    show: (webglVersion, breadcrumbs=true) ->
+    show: (version, breadcrumbs=true) ->
         behavior.deactivate()
         behavior.collapse(@)
 
         if breadcrumbs
-            @breadcrumbs(webglVersion)
+            @breadcrumbs(version)
             versionLabel = ''
         else
-            versionLabel = util.versionLabel(webglVersion) + ' '
+            versionLabel = util.versionLabel(version) + ' '
 
         mainRow = $('<div></div>')
             .addClass('row')
             .addClass('responsive')
             .appendTo('main')
-       
-        #gauges
+        @supportGauges(version, versionLabel, mainRow)
+        @caveatDonut(version, versionLabel, mainRow)
+        
+        @supportSeries(version, versionLabel)
+
+    caveatDonut: (version, versionLabel, parent) ->
         col = $('<div></div>')
-            .appendTo(mainRow)
+            .appendTo(parent)
         widget = $('<div class="box"></div>')
             .appendTo(col)
-        $('<h1>Support (30 days)</h1>')
-            .text(versionLabel + 'Support (30 days)')
+        $('<h1></h1>')
+            .text(versionLabel + 'Major Performance Caveat (30d)')
+            .appendTo(widget)
+        @donut(version, versionLabel).appendTo(widget)
+        
+    supportSeries: (version, versionLabel) ->
+        widget = $('<div class="full box"></div>')
+            .appendTo('main')
+        $('<h1></h1>')
+            .text(versionLabel + 'Support')
+            .appendTo(widget)
+        @series(version).appendTo(widget)
+
+    supportGauges: (version, versionLabel, parent) ->
+        col = $('<div></div>')
+            .appendTo(parent)
+        widget = $('<div class="box"></div>')
+            .appendTo(col)
+        $('<h1>Support (30d)</h1>')
+            .text(versionLabel + 'Support (30d)')
             .appendTo(widget)
         row = $('<div class="row center"></div>')
             .appendTo(widget)
         col = $('<div></div>')
             .appendTo(row)
-        @gauge(webglVersion, 'large', 'All')
+        @gauge(version, 'large', 'All')
             .appendTo(col)
         smallCharts = $('<div></div>')
             .appendTo(row)
         row = $('<div class="row center"></div>')
             .appendTo(smallCharts)
         col = $('<div></div>').appendTo(row)
-        @gauge(webglVersion, 'small', 'Desktop', 'desktop').appendTo(col)
+        @gauge(version, 'small', 'Desktop', 'desktop').appendTo(col)
         col = $('<div></div>').appendTo(row)
-        @gauge(webglVersion, 'small', 'Smartphone', 'smartphone').appendTo(col)
+        @gauge(version, 'small', 'Smartphone', 'smartphone').appendTo(col)
         row = $('<div class="row center"></div>')
             .appendTo(smallCharts)
         col = $('<div></div>').appendTo(row)
-        @gauge(webglVersion, 'small', 'Tablet', 'tablet').appendTo(col)
+        @gauge(version, 'small', 'Tablet', 'tablet').appendTo(col)
         col = $('<div></div>').appendTo(row)
-        @gauge(webglVersion, 'small', 'Console', 'game_console').appendTo(col)
-        
-        #time series
-        col = $('<div></div>')
-            .appendTo(mainRow)
-        widget = $('<div class="box"></div>')
-            .appendTo(col)
-        $('<h1></h1>')
-            .text(versionLabel + 'Support')
-            .appendTo(widget)
-        @series(webglVersion).appendTo(widget)
+        @gauge(version, 'small', 'Console', 'game_console').appendTo(col)
 
     gauge: (webglVersion, size='small', label=null, device=null) =>
         chart = new Gauge(label:label, size:size)
@@ -154,6 +166,42 @@ exports.index = class Main
                     chart.update(result.values)
 
         return chart.elem
+    
+    donut: (version, versionLabel) ->
+        chart = new Donut()
+
+        @filter.onChange chart.elem, =>
+            chart.elem.addClass('spinner')
+            query =
+                filterBy: {webgl:true}
+                bucketBy: 'webgl.majorPerformanceCaveat'
+                start: -30
+
+            if @filter.platforms?
+                query.filterBy.platform = @filter.platforms
+
+            db.execute
+                db: version
+                query: query
+                success: (result) ->
+                    chart.elem.removeClass('spinner')
+
+                    values = for label, n in result.keys
+                        if not label?
+                            label = 'Unknown'
+
+                        value = result.values[n]
+                        {
+                            label: (
+                                util.capitalize(label.replace(/_/g, ' ')) +
+                                " #{((value*100/result.total).toFixed(1))}% (#{util.formatNumber(value)})"
+                            )
+                            value:result.values[n]
+                        }
+
+                    chart.update(values)
+
+        return $(chart.elem)
 
     deactivate: ->
         null
