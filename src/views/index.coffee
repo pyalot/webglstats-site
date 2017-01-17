@@ -5,6 +5,7 @@ Traffic = sys.import 'traffic'
 Filter = sys.import 'filter'
 Search = sys.import 'search'
 db = sys.import 'db'
+notFound = sys.import 'not-found'
 
 exports.index = class Views
     constructor: ->
@@ -54,6 +55,11 @@ exports.index = class Views
                 category = parts.shift()
                 name = parts.shift()
 
+                if not webglVersion?
+                    notFound()
+
                 switch category
                     when 'parameter' then @parameters.show(webglVersion, name, pageload)
                     when 'extension' then @extensions.show(webglVersion, name, pageload)
+                    else
+                        notFound()

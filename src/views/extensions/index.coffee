@@ -3,6 +3,7 @@ util = sys.import '/util'
 {Gauge, Series, StackedPercentage} = sys.import '/chart'
 NavlistExpand = sys.import '../navlist'
 info = sys.import 'info'
+notFound = sys.import '../not-found'
 
 extensionLabel = (name) ->
     parts = name.split('_')
@@ -87,11 +88,20 @@ exports.index = class Extensions
             .wrap('<li></li>')
 
     show: (webglVersion, name, pageload) ->
+        meta = info[name]
+
+        if not meta?
+            return notFound()
+
+        if meta.status not in ['ratified', 'community']
+            return notFound()
+
+        if ({webgl1:1, webgl2:2})[webglVersion] not in meta.versions
+            return notFound()
+
         switch webglVersion
             when 'webgl1' then @nav1.activate(name, pageload)
             when 'webgl2' then @nav2.activate(name, pageload)
-
-        meta = info[name]
 
         @breadcrumbs(webglVersion, name)
 

@@ -192,7 +192,7 @@ $(function() {
 });
 });
 moduleManager.module('/views/index', function(exports,sys){
-var Extensions, Filter, Main, Parameters, Search, Traffic, Views, db;
+var Extensions, Filter, Main, Parameters, Search, Traffic, Views, db, notFound;
 
 Parameters = sys["import"]('parameters');
 
@@ -207,6 +207,8 @@ Filter = sys["import"]('filter');
 Search = sys["import"]('search');
 
 db = sys["import"]('db');
+
+notFound = sys["import"]('not-found');
 
 exports.index = Views = (function() {
   function Views() {
@@ -257,11 +259,16 @@ exports.index = Views = (function() {
         }[parts.shift()];
         category = parts.shift();
         name = parts.shift();
+        if (webglVersion == null) {
+          notFound();
+        }
         switch (category) {
           case 'parameter':
             return this.parameters.show(webglVersion, name, pageload);
           case 'extension':
             return this.extensions.show(webglVersion, name, pageload);
+          default:
+            return notFound();
         }
     }
   };
@@ -271,7 +278,7 @@ exports.index = Views = (function() {
 })();
 });
 moduleManager.module('/views/parameters', function(exports,sys){
-var Bar, NavlistExpand, Parameters, StackedPercentage, db, fieldNames, info, ref, util,
+var Bar, NavlistExpand, Parameters, StackedPercentage, db, fieldNames, info, notFound, ref, util,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 db = sys["import"]('db');
@@ -281,6 +288,8 @@ util = sys["import"]('/util');
 NavlistExpand = sys["import"]('navlist');
 
 ref = sys["import"]('/chart'), StackedPercentage = ref.StackedPercentage, Bar = ref.Bar;
+
+notFound = sys["import"]('not-found');
 
 info = {
   ALIASED_LINE_WIDTH_RANGE: {
@@ -550,7 +559,11 @@ exports.index = Parameters = (function() {
   };
 
   Parameters.prototype.show = function(webglVersion, name, pageload) {
-    var col, full, i, len, ref1, row, version, widget;
+    var col, full, i, len, meta, ref1, row, version, widget;
+    meta = info[name];
+    if (meta == null) {
+      return notFound();
+    }
     switch (webglVersion) {
       case 'webgl1':
         this.nav1.activate(name, pageload);
@@ -563,8 +576,8 @@ exports.index = Parameters = (function() {
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1></h1>').text(name).appendTo(widget);
-    $('<p></p>').append(info[name].description).appendTo(widget);
-    ref1 = info[name].versions;
+    $('<p></p>').append(meta.description).appendTo(widget);
+    ref1 = meta.versions;
     for (i = 0, len = ref1.length; i < len; i++) {
       version = ref1[i];
       $('<span class="tag"></span>').text("WebGL " + version).appendTo(widget);
@@ -2903,7 +2916,7 @@ exports.index = Donut = (function() {
 })();
 });
 moduleManager.module('/views/extensions/index', function(exports,sys){
-var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, extensionLabel, info, ref, util,
+var Extensions, Gauge, NavlistExpand, Series, StackedPercentage, db, extensionLabel, info, notFound, ref, util,
   indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
 db = sys["import"]('../db');
@@ -2915,6 +2928,8 @@ ref = sys["import"]('/chart'), Gauge = ref.Gauge, Series = ref.Series, StackedPe
 NavlistExpand = sys["import"]('../navlist');
 
 info = sys["import"]('info');
+
+notFound = sys["import"]('../not-found');
 
 extensionLabel = function(name) {
   var parts;
@@ -3012,7 +3027,20 @@ exports.index = Extensions = (function() {
   };
 
   Extensions.prototype.show = function(webglVersion, name, pageload) {
-    var col, i, j, len, len1, meta, param, ref1, ref2, results, row, version, widget;
+    var col, i, j, len, len1, meta, param, ref1, ref2, ref3, ref4, results, row, version, widget;
+    meta = info[name];
+    if (meta == null) {
+      return notFound();
+    }
+    if ((ref1 = meta.status) !== 'ratified' && ref1 !== 'community') {
+      return notFound();
+    }
+    if (ref2 = {
+      webgl1: 1,
+      webgl2: 2
+    }[webglVersion], indexOf.call(meta.versions, ref2) < 0) {
+      return notFound();
+    }
     switch (webglVersion) {
       case 'webgl1':
         this.nav1.activate(name, pageload);
@@ -3020,16 +3048,15 @@ exports.index = Extensions = (function() {
       case 'webgl2':
         this.nav2.activate(name, pageload);
     }
-    meta = info[name];
     this.breadcrumbs(webglVersion, name);
     row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
     $('<h1></h1>').text(name).appendTo(widget);
     $('<p></p>').append(meta.description).appendTo(widget);
-    ref1 = meta.versions;
-    for (i = 0, len = ref1.length; i < len; i++) {
-      version = ref1[i];
+    ref3 = meta.versions;
+    for (i = 0, len = ref3.length; i < len; i++) {
+      version = ref3[i];
       $('<span class="tag"></span>').text("WebGL " + version).appendTo(widget);
     }
     $('<span class="tag"></span>').text(util.capitalize(meta.status)).appendTo(widget);
@@ -3040,10 +3067,10 @@ exports.index = Extensions = (function() {
     widget = $('<div class="full box"></div>').appendTo('main');
     this.series(webglVersion, name).appendTo(widget);
     if (meta.params != null) {
-      ref2 = meta.params;
+      ref4 = meta.params;
       results = [];
-      for (j = 0, len1 = ref2.length; j < len1; j++) {
-        param = ref2[j];
+      for (j = 0, len1 = ref4.length; j < len1; j++) {
+        param = ref4[j];
         widget = $('<div class="full box"></div>').appendTo('main');
         $('<h1></h1>').text(param).appendTo(widget);
         results.push(this.stackedPercentage(webglVersion, name, param).appendTo(widget));
@@ -3463,6 +3490,14 @@ webgl2only = 'EXT_color_buffer_float\nEXT_disjoint_timer_query_webgl2\nWEBGL_get
 webgl12 = 'WEBGL_lose_context\nWEBGL_debug_renderer_info\nWEBGL_compressed_texture_s3tc\nWEBGL_compressed_texture_s3tc_srgb\nEXT_texture_filter_anisotropic\nOES_texture_float_linear\nWEBGL_compressed_texture_atc\nWEBGL_compressed_texture_pvrtc\nWEBGL_compressed_texture_etc1\nEXT_disjoint_timer_query\nWEBGL_compressed_texture_etc\nWEBGL_compressed_texture_astc\nWEBGL_shared_resources\nWEBGL_security_sensitive_resources\nOES_EGL_image_external\nWEBGL_debug\nWEBGL_dynamic_texture\nWEBGL_subarray_uploads\nWEBGL_debug_shaders'.trim().split('\n');
 
 names = ['blend_minmax', 'color_buffer_float', 'color_buffer_half_float', 'compressed_texture_astc', 'compressed_texture_atc', 'compressed_texture_etc1', 'compressed_texture_pvrtc', 'compressed_texture_s3tc', 'debug_renderer_info', 'depth_texture', 'disjoint_timer_query', 'draw_buffers', 'element_index_uint', 'frag_depth', 'instanced_arrays', 'lose_context', 'sRGB', 'shader_texture_lod', 'standard_derivatives', 'texture_filter_anisotropic', 'texture_float', 'texture_float_linear', 'texture_half_float', 'texture_half_float_linear', 'vertex_array_object'];
+});
+moduleManager.module('/views/not-found', function(exports,sys){
+exports.index = function() {
+  var widget;
+  widget = $('<div class="full box"></div>').appendTo('main');
+  $('<h1>Page Not Found</h1>').appendTo(widget);
+  return $('<p>\n    The page you requested could not be found.\n</p>').appendTo(widget);
+};
 });
 moduleManager.index();
 })();

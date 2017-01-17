@@ -2,6 +2,7 @@ db = sys.import 'db'
 util = sys.import '/util'
 NavlistExpand = sys.import 'navlist'
 {StackedPercentage, Bar} = sys.import '/chart'
+notFound = sys.import 'not-found'
 
 info =
     ALIASED_LINE_WIDTH_RANGE:
@@ -308,6 +309,11 @@ exports.index = class Parameters
             .wrap('<li></li>')
 
     show: (webglVersion, name, pageload) ->
+        meta = info[name]
+
+        if not meta?
+            return notFound()
+
         switch webglVersion
             when 'webgl1' then @nav1.activate(name, pageload)
             when 'webgl2' then @nav2.activate(name, pageload)
@@ -328,10 +334,10 @@ exports.index = class Parameters
             .appendTo(widget)
 
         $('<p></p>')
-            .append(info[name].description)
+            .append(meta.description)
             .appendTo(widget)
         
-        for version in info[name].versions
+        for version in meta.versions
             $('<span class="tag"></span>')
                 .text("WebGL #{version}")
                 .appendTo(widget)
