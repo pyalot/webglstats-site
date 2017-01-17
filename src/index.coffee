@@ -1,5 +1,7 @@
 navLists = []
 Views = sys.import 'views'
+db = sys.import 'views/db'
+util = sys.import 'util'
 
 $ ->
     views = new Views()
@@ -37,3 +39,13 @@ $ ->
         views.handle('/search', query)
         event.preventDefault()
         event.stopPropagation()
+
+
+    db.execute
+        query:
+            series: 'daily'
+            start: -2
+        success: (result) ->
+            date = result.values[1].name
+            [year, month, day] = date.split('-')
+            $('header > span.updated').text('Last data from: ' + util.formatDate(year, month, day))

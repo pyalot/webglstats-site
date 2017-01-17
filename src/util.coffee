@@ -40,4 +40,11 @@ exports.versionPath = (webglVersion) ->
 exports.versionLabel = (webglVersion) ->
     ({webgl1:'WebGL 1', webgl2:'WebGL 2'})[webglVersion]
 
-
+monthNames = [
+    'Jan', 'Feb', 'Mar', 'Apr',
+    'May', 'Jun', 'Jul', 'Aug',
+    'Sep', 'Oct', 'Nov', 'Dec',
+]
+exports.formatDate = (year, month, day) ->
+    month = parseInt(month, 10)-1
+    return "#{day} #{monthNames[month]}. #{year}"

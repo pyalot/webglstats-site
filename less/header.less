@@ -8,6 +8,14 @@ header{
     border-bottom: 1px solid rgba(0,0,0,0.75);
     z-index: 1;
 
+    > span.updated{
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        color: rgba(0,0,0,0.5);
+        padding-right: 5px;
+    }
+
     img{
         height: 40px;
         vertical-align: middle;
@@ -49,9 +57,5 @@ header{
         visibility: visible;
         transition: width 0.05s;
         pointer-events: none;
-    }
-
-    form{
-        display: inline-block;
     }
 }

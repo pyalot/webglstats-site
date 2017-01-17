@@ -440,6 +440,13 @@ header {
   border-bottom: 1px solid rgba(0, 0, 0, 0.75);
   z-index: 1;
 }
+header > span.updated {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  color: rgba(0, 0, 0, 0.5);
+  padding-right: 5px;
+}
 header img {
   height: 40px;
   vertical-align: middle;
@@ -477,9 +484,6 @@ header .progress {
   visibility: visible;
   transition: width 0.05s;
   pointer-events: none;
-}
-header form {
-  display: inline-block;
 }
 .spinner {
   animation: jump 0.6s ease 0s infinite normal;

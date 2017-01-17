@@ -141,11 +141,15 @@ moduleManager = {
   }
 };
 moduleManager.module('/index', function(exports,sys){
-var Views, navLists;
+var Views, db, navLists, util;
 
 navLists = [];
 
 Views = sys["import"]('views');
+
+db = sys["import"]('views/db');
+
+util = sys["import"]('util');
 
 $(function() {
   var path, query, views;
@@ -179,7 +183,7 @@ $(function() {
   $('div.overlay').click(function() {
     return $('body').removeClass('sidebar');
   });
-  return $('form.search').submit(function(event) {
+  $('form.search').submit(function(event) {
     var term;
     term = $(this).find('input[type=text]').val();
     query = "?query=" + term;
@@ -188,6 +192,18 @@ $(function() {
     views.handle('/search', query);
     event.preventDefault();
     return event.stopPropagation();
+  });
+  return db.execute({
+    query: {
+      series: 'daily',
+      start: -2
+    },
+    success: function(result) {
+      var date, day, month, ref, year;
+      date = result.values[1].name;
+      ref = date.split('-'), year = ref[0], month = ref[1], day = ref[2];
+      return $('header > span.updated').text('Last data from: ' + util.formatDate(year, month, day));
+    }
   });
 });
 });
@@ -2476,6 +2492,8 @@ exports.index = Bar = (function() {
 })();
 });
 moduleManager.module('/util', function(exports,sys){
+var monthNames;
+
 exports.measureHeight = function(elem) {
   var height, origHeight, origTransition, style;
   style = elem.style;
@@ -2527,6 +2545,13 @@ exports.versionLabel = function(webglVersion) {
     webgl1: 'WebGL 1',
     webgl2: 'WebGL 2'
   }[webglVersion];
+};
+
+monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+exports.formatDate = function(year, month, day) {
+  month = parseInt(month, 10) - 1;
+  return day + " " + monthNames[month] + ". " + year;
 };
 });
 moduleManager.module('/views/behavior', function(exports,sys){
