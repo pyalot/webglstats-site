@@ -429,6 +429,7 @@ body {
   color: white;
   min-height: 100%;
   overflow-x: hidden;
+  overflow-y: scroll;
 }
 header {
   height: 60px;
@@ -446,6 +447,11 @@ header > span.updated {
   right: 0px;
   color: rgba(0, 0, 0, 0.5);
   padding-right: 5px;
+}
+@media (max-width: 445px) {
+  header > span.updated {
+    display: none;
+  }
 }
 header img {
   height: 40px;
