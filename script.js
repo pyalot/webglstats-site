@@ -219,6 +219,12 @@ exports.index = Views = (function() {
     this.traffic = new Traffic(this.filter, this.search);
   }
 
+  Views.prototype.breadcrumbs = function() {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    return $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+  };
+
   Views.prototype.handle = function(path, query, pageload) {
     var category, name, parts, webglVersion;
     if (pageload == null) {
@@ -228,18 +234,19 @@ exports.index = Views = (function() {
     $('body').removeClass('sidebar');
     switch (path) {
       case '/':
+        this.breadcrumbs();
         this.main.showInfo();
-        this.main.show('webgl1', pageload);
-        return this.main.show('webgl2', pageload);
+        this.main.show('webgl1', false);
+        return this.main.show('webgl2', false);
       case '/search':
         return this.search.show(query, pageload);
       case '/traffic':
         return this.traffic.show();
       case '/webgl':
-        this.main.show('webgl1', pageload);
+        this.main.show('webgl1');
         return this.extensions.overview('webgl1', pageload);
       case '/webgl2':
-        this.main.show('webgl2', pageload);
+        this.main.show('webgl2');
         return this.extensions.overview('webgl2', pageload);
       default:
         path = path.slice(1);
@@ -533,6 +540,15 @@ exports.index = Parameters = (function() {
     });
   };
 
+  Parameters.prototype.breadcrumbs = function(webglVersion, name) {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+    $('<a></a>').attr('href', '/' + util.versionPath(webglVersion)).text(util.versionLabel(webglVersion)).appendTo(breadcrumbs).wrap('<li></li>');
+    $('<li>Parameter</li>').appendTo(breadcrumbs);
+    return $('<a></a>').attr('href', "/" + (util.versionPath(webglVersion)) + "/parameter/" + name).text(name).appendTo(breadcrumbs).wrap('<li></li>');
+  };
+
   Parameters.prototype.show = function(webglVersion, name, pageload) {
     var col, full, i, len, ref1, row, version, widget;
     switch (webglVersion) {
@@ -542,6 +558,7 @@ exports.index = Parameters = (function() {
       case 'webgl2':
         this.nav2.activate(name, pageload);
     }
+    this.breadcrumbs(webglVersion, name);
     row = $('<div class="row responsive"></div>').appendTo('main');
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
@@ -763,14 +780,30 @@ exports.index = Main = (function() {
     return $('<p>\n    <a href="http://webglreport.com/">WebGL Report</a> allows you to see the parameters your browser has implemented.\n</p>').appendTo(widget);
   };
 
-  Main.prototype.show = function(webglVersion) {
-    var col, mainRow, row, smallCharts, widget;
+  Main.prototype.breadcrumbs = function(webglVersion) {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+    return $('<a></a>').attr('href', '/' + util.versionPath(webglVersion)).text(util.versionLabel(webglVersion)).appendTo(breadcrumbs).wrap('<li></li>');
+  };
+
+  Main.prototype.show = function(webglVersion, breadcrumbs) {
+    var col, mainRow, row, smallCharts, versionLabel, widget;
+    if (breadcrumbs == null) {
+      breadcrumbs = true;
+    }
     behavior.deactivate();
     behavior.collapse(this);
+    if (breadcrumbs) {
+      this.breadcrumbs(webglVersion);
+      versionLabel = '';
+    } else {
+      versionLabel = util.versionLabel(webglVersion) + ' ';
+    }
     mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1>Support (30 days)</h1>').text(util.versionLabel(webglVersion) + ' Support (30 days)').appendTo(widget);
+    $('<h1>Support (30 days)</h1>').text(versionLabel + 'Support (30 days)').appendTo(widget);
     row = $('<div class="row center"></div>').appendTo(widget);
     col = $('<div></div>').appendTo(row);
     this.gauge(webglVersion, 'large', 'All').appendTo(col);
@@ -787,7 +820,7 @@ exports.index = Main = (function() {
     this.gauge(webglVersion, 'small', 'Console', 'game_console').appendTo(col);
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
-    $('<h1></h1>').text(util.versionLabel(webglVersion) + ' Support').appendTo(widget);
+    $('<h1></h1>').text(versionLabel + 'Support').appendTo(widget);
     return this.series(webglVersion).appendTo(widget);
   };
 
@@ -2474,8 +2507,16 @@ exports.index = Search = (function() {
     this.entries = {};
   }
 
+  Search.prototype.breadcrumbs = function() {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+    return $('<li>Search</li>').appendTo(breadcrumbs);
+  };
+
   Search.prototype.show = function(query, instant) {
     var entry, i, len, link, result, results, results1, text, widget;
+    this.breadcrumbs();
     query = query.get('query');
     results = this.index.search(query);
     behavior.deactivate();
@@ -2543,10 +2584,18 @@ exports.index = Traffic = (function() {
     null;
   }
 
+  Traffic.prototype.breadcrumbs = function() {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+    return $('<a></a>').attr('href', '/traffic').text('Visitors').appendTo(breadcrumbs).wrap('<li></li>');
+  };
+
   Traffic.prototype.show = function() {
     var col, full, mainRow, widget;
     behavior.deactivate();
     behavior.collapse(this);
+    this.breadcrumbs();
     mainRow = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(mainRow);
     widget = $('<div class="box"></div>').appendTo(col);
@@ -2887,6 +2936,15 @@ exports.index = Extensions = (function() {
     });
   };
 
+  Extensions.prototype.breadcrumbs = function(webglVersion, name) {
+    var breadcrumbs;
+    breadcrumbs = $('<ol class="breadcrumbs"></ol>').appendTo('main');
+    $('<a></a>').attr('href', '/').text('Home').appendTo(breadcrumbs).wrap('<li></li>');
+    $('<a></a>').attr('href', '/' + util.versionPath(webglVersion)).text(util.versionLabel(webglVersion)).appendTo(breadcrumbs).wrap('<li></li>');
+    $('<li>Extension</li>').appendTo(breadcrumbs);
+    return $('<a></a>').attr('href', "/" + (util.versionPath(webglVersion)) + "/extension/" + name).text(name).appendTo(breadcrumbs).wrap('<li></li>');
+  };
+
   Extensions.prototype.show = function(webglVersion, name, pageload) {
     var col, i, j, len, len1, meta, param, ref1, ref2, results, row, version, widget;
     switch (webglVersion) {
@@ -2897,6 +2955,7 @@ exports.index = Extensions = (function() {
         this.nav2.activate(name, pageload);
     }
     meta = info[name];
+    this.breadcrumbs(webglVersion, name);
     row = $('<div></div>').addClass('row').addClass('responsive').appendTo('main');
     col = $('<div></div>').appendTo(row);
     widget = $('<div class="box"></div>').appendTo(col);
@@ -2930,7 +2989,7 @@ exports.index = Extensions = (function() {
   Extensions.prototype.overview = function(webglVersion, pageload) {
     var collection, container, entry, flow, i, len, results;
     flow = $('<div class="flow box"></div>').appendTo('main');
-    $('<h1></h1>').text(util.versionLabel(webglVersion) + ' Extensions').appendTo(flow);
+    $('<h1></h1>').text('Extensions').appendTo(flow);
     if (webglVersion === 'webgl1') {
       collection = this.webgl1;
     } else if (webglVersion === 'webgl2') {

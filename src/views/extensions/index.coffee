@@ -61,6 +61,30 @@ exports.index = class Extensions
             gauge: =>
                 @gauge(version, entry.name)
 
+    breadcrumbs: (webglVersion, name) ->
+        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
+            .appendTo('main')
+        
+        $('<a></a>')
+            .attr('href', '/')
+            .text('Home')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+        $('<a></a>')
+            .attr('href', '/' + util.versionPath(webglVersion))
+            .text(util.versionLabel(webglVersion))
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+        $('<li>Extension</li>')
+            .appendTo(breadcrumbs)
+        
+        $('<a></a>')
+            .attr('href', "/#{util.versionPath(webglVersion)}/extension/#{name}")
+            .text(name)
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
 
     show: (webglVersion, name, pageload) ->
         switch webglVersion
@@ -68,6 +92,8 @@ exports.index = class Extensions
             when 'webgl2' then @nav2.activate(name, pageload)
 
         meta = info[name]
+
+        @breadcrumbs(webglVersion, name)
 
         row = $('<div></div>')
             .addClass('row')
@@ -131,7 +157,7 @@ exports.index = class Extensions
             .appendTo('main')
 
         $('<h1></h1>')
-            .text(util.versionLabel(webglVersion) + ' Extensions')
+            .text('Extensions')
             .appendTo(flow)
 
         if webglVersion == 'webgl1'

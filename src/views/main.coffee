@@ -36,9 +36,31 @@ exports.index = class Main
             <a href="http://webglreport.com/">WebGL Report</a> allows you to see the parameters your browser has implemented.
         </p>''').appendTo(widget)
 
-    show: (webglVersion) ->
+    breadcrumbs: (webglVersion) ->
+        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
+            .appendTo('main')
+        
+        $('<a></a>')
+            .attr('href', '/')
+            .text('Home')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+        $('<a></a>')
+            .attr('href', '/' + util.versionPath(webglVersion))
+            .text(util.versionLabel(webglVersion))
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+    show: (webglVersion, breadcrumbs=true) ->
         behavior.deactivate()
         behavior.collapse(@)
+
+        if breadcrumbs
+            @breadcrumbs(webglVersion)
+            versionLabel = ''
+        else
+            versionLabel = util.versionLabel(webglVersion) + ' '
 
         mainRow = $('<div></div>')
             .addClass('row')
@@ -51,7 +73,7 @@ exports.index = class Main
         widget = $('<div class="box"></div>')
             .appendTo(col)
         $('<h1>Support (30 days)</h1>')
-            .text(util.versionLabel(webglVersion) + ' Support (30 days)')
+            .text(versionLabel + 'Support (30 days)')
             .appendTo(widget)
         row = $('<div class="row center"></div>')
             .appendTo(widget)
@@ -80,7 +102,7 @@ exports.index = class Main
         widget = $('<div class="box"></div>')
             .appendTo(col)
         $('<h1></h1>')
-            .text(util.versionLabel(webglVersion) + ' Support')
+            .text(versionLabel + 'Support')
             .appendTo(widget)
         @series(webglVersion).appendTo(widget)
 

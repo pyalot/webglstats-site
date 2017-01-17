@@ -281,11 +281,38 @@ exports.index = class Parameters
             ]
             body: info[name].description
             type: "#{util.versionLabel(version)} Parameter"
+    
+    breadcrumbs: (webglVersion, name) ->
+        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
+            .appendTo('main')
+        
+        $('<a></a>')
+            .attr('href', '/')
+            .text('Home')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+        $('<a></a>')
+            .attr('href', '/' + util.versionPath(webglVersion))
+            .text(util.versionLabel(webglVersion))
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
+        $('<li>Parameter</li>')
+            .appendTo(breadcrumbs)
+        
+        $('<a></a>')
+            .attr('href', "/#{util.versionPath(webglVersion)}/parameter/#{name}")
+            .text(name)
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
 
     show: (webglVersion, name, pageload) ->
         switch webglVersion
             when 'webgl1' then @nav1.activate(name, pageload)
             when 'webgl2' then @nav2.activate(name, pageload)
+
+        @breadcrumbs webglVersion, name
 
         row = $('<div class="row responsive"></div>')
             .appendTo('main')

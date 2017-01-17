@@ -6,10 +6,28 @@ behavior = sys.import 'behavior'
 exports.index = class Traffic
     constructor: (@filter, search) ->
         null
+    
+    breadcrumbs: ->
+        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
+            .appendTo('main')
+        
+        $('<a></a>')
+            .attr('href', '/')
+            .text('Home')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+        
+        $('<a></a>')
+            .attr('href', '/traffic')
+            .text('Visitors')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
 
     show: ->
         behavior.deactivate()
         behavior.collapse(@)
+
+        @breadcrumbs()
       
         ## first row ##
         mainRow = $('<div></div>')

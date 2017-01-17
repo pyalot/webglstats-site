@@ -17,24 +17,35 @@ exports.index = class Views
         @extensions = new Extensions(@filter, @search)
         @traffic = new Traffic(@filter, @search)
 
+    breadcrumbs: ->
+        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
+            .appendTo('main')
+
+        $('<a></a>')
+            .attr('href', '/')
+            .text('Home')
+            .appendTo(breadcrumbs)
+            .wrap('<li></li>')
+
     handle: (path, query, pageload=false) ->
         $('main').empty()
         $('body').removeClass('sidebar')
 
         switch path
             when '/'
+                @breadcrumbs()
                 @main.showInfo()
-                @main.show('webgl1', pageload)
-                @main.show('webgl2', pageload)
+                @main.show('webgl1', false)
+                @main.show('webgl2', false)
             when '/search'
                 @search.show(query, pageload)
             when '/traffic'
                 @traffic.show()
             when '/webgl'
-                @main.show('webgl1', pageload)
+                @main.show('webgl1')
                 @extensions.overview('webgl1', pageload)
             when '/webgl2'
-                @main.show('webgl2', pageload)
+                @main.show('webgl2')
                 @extensions.overview('webgl2', pageload)
             else
                 path = path[1...]
