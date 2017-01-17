@@ -202,7 +202,7 @@ $(function() {
       var date, day, month, ref, year;
       date = result.values[1].name;
       ref = date.split('-'), year = ref[0], month = ref[1], day = ref[2];
-      return $('header > span.updated').text('Last data from: ' + util.formatDate(year, month, day));
+      return $('header > span.updated').text('Last update: ' + util.formatDate(year, month, day));
     }
   });
 });

@@ -48,4 +48,4 @@ $ ->
         success: (result) ->
             date = result.values[1].name
             [year, month, day] = date.split('-')
-            $('header > span.updated').text('Last data from: ' + util.formatDate(year, month, day))
+            $('header > span.updated').text('Last update: ' + util.formatDate(year, month, day))
