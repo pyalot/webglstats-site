@@ -7,9 +7,13 @@ $ ->
     views = new Views()
 
     document.addEventListener 'click', (event) ->
+        if event.ctrlKey or event.shiftKey or event.metaKey or event.altKey
+            return
+
         target = event.target ? event.srcElement
-        if target.tagName == 'A'
-            href = target.getAttribute('href')
+        anchor = $(target).closest('a')[0]
+        if anchor?
+            href = anchor.getAttribute('href')
             if href? and href.startsWith('/')
                 event.preventDefault()
                 history.pushState(null, null, href)
