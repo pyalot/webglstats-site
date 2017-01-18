@@ -187,14 +187,11 @@ exports.index = class Main
                     chart.elem.removeClass('spinner')
 
                     values = for label, n in result.keys
-                        if not label?
-                            label = 'Unknown'
-
+                        label = ({null:'Unknown', false:'False', true:'True'})[label]
                         value = result.values[n]
                         {
                             label: (
-                                util.capitalize(label.replace(/_/g, ' ')) +
-                                " #{((value*100/result.total).toFixed(1))}% (#{util.formatNumber(value)})"
+                                "#{label} #{((value*100/result.total).toFixed(1))}% (#{util.formatNumber(value)})"
                             )
                             value:result.values[n]
                         }

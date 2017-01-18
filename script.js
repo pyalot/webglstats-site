@@ -974,12 +974,14 @@ exports.index = Main = (function() {
               results = [];
               for (n = i = 0, len = ref1.length; i < len; n = ++i) {
                 label = ref1[n];
-                if (label == null) {
-                  label = 'Unknown';
-                }
+                label = {
+                  "null": 'Unknown',
+                  "false": 'False',
+                  "true": 'True'
+                }[label];
                 value = result.values[n];
                 results.push({
-                  label: util.capitalize(label.replace(/_/g, ' ')) + (" " + ((value * 100 / result.total).toFixed(1)) + "% (" + (util.formatNumber(value)) + ")"),
+                  label: label + " " + ((value * 100 / result.total).toFixed(1)) + "% (" + (util.formatNumber(value)) + ")",
                   value: result.values[n]
                 });
               }
