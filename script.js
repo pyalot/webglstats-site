@@ -2673,6 +2673,91 @@ exports.index = Search = (function() {
 
 })();
 });
+moduleManager.module('/chart/donut', function(exports,sys){
+var Donut, colors;
+
+colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
+
+exports.index = Donut = (function() {
+  function Donut(options) {
+    var canvas, ref, ref1;
+    if (options == null) {
+      options = {};
+    }
+    this.width = (ref = options.width) != null ? ref : 160;
+    this.height = (ref1 = options.height) != null ? ref1 : 160;
+    this.elem = $('<div class="donut"></div>');
+    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
+    canvas.width = this.width;
+    canvas.height = this.height;
+    this.ctx = canvas.getContext('2d');
+    this.legend = $('<div></div>').appendTo(this.elem);
+  }
+
+  Donut.prototype.update = function(values) {
+    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
+    values.sort(function(a, b) {
+      return b.value - a.value;
+    });
+    values = values.filter(function(entry) {
+      return entry.value > 0;
+    });
+    this.legend.empty();
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    total = 0;
+    for (i = 0, len = values.length; i < len; i++) {
+      entry = values[i];
+      total += entry.value;
+    }
+    start = 0;
+    results = [];
+    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
+      entry = values[n];
+      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
+      color = "rgb(" + r + "," + g + "," + b + ")";
+      end = start + entry.value / total;
+      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
+      this.segment(start, end, color);
+      this.separator(end);
+      results.push(start = end);
+    }
+    return results;
+  };
+
+  Donut.prototype.separator = function(pos) {
+    var a, cx, cy, r1, r2, x1, x2, y1, y2;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    a = Math.PI * 2 * pos - Math.PI / 2;
+    cx = this.width / 2;
+    cy = this.height / 2;
+    x1 = cx + Math.cos(a) * r1;
+    y1 = cy + Math.sin(a) * r1;
+    x2 = cx + Math.cos(a) * r2;
+    y2 = cy + Math.sin(a) * r2;
+    this.ctx.beginPath();
+    this.ctx.moveTo(x1, y1);
+    this.ctx.lineTo(x2, y2);
+    return this.ctx.stroke();
+  };
+
+  Donut.prototype.segment = function(start, end, color) {
+    var r1, r2;
+    start = Math.PI * 2 * start - Math.PI / 2;
+    end = Math.PI * 2 * end - Math.PI / 2;
+    this.ctx.fillStyle = color;
+    r2 = Math.min(this.width, this.height) / 2;
+    r1 = r2 * 0.8;
+    this.ctx.beginPath();
+    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
+    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
+    return this.ctx.fill();
+  };
+
+  return Donut;
+
+})();
+});
 moduleManager.module('/views/traffic', function(exports,sys){
 var Donut, Gauge, Series, StackedPercentage, Traffic, behavior, db, ref, util;
 
@@ -2854,91 +2939,6 @@ exports.index = Traffic = (function() {
   };
 
   return Traffic;
-
-})();
-});
-moduleManager.module('/chart/donut', function(exports,sys){
-var Donut, colors;
-
-colors = [[160, 0, 65], [94, 76, 164], [44, 135, 191], [98, 195, 165], [170, 222, 162], [230, 246, 147], [255, 255, 188], [255, 255, 133], [255, 175, 89], [246, 109, 58]];
-
-exports.index = Donut = (function() {
-  function Donut(options) {
-    var canvas, ref, ref1;
-    if (options == null) {
-      options = {};
-    }
-    this.width = (ref = options.width) != null ? ref : 160;
-    this.height = (ref1 = options.height) != null ? ref1 : 160;
-    this.elem = $('<div class="donut"></div>');
-    canvas = $('<canvas></canvas>').appendTo(this.elem)[0];
-    canvas.width = this.width;
-    canvas.height = this.height;
-    this.ctx = canvas.getContext('2d');
-    this.legend = $('<div></div>').appendTo(this.elem);
-  }
-
-  Donut.prototype.update = function(values) {
-    var b, color, end, entry, g, i, j, len, len1, n, r, ref, results, start, total;
-    values.sort(function(a, b) {
-      return b.value - a.value;
-    });
-    values = values.filter(function(entry) {
-      return entry.value > 0;
-    });
-    this.legend.empty();
-    this.ctx.clearRect(0, 0, this.width, this.height);
-    total = 0;
-    for (i = 0, len = values.length; i < len; i++) {
-      entry = values[i];
-      total += entry.value;
-    }
-    start = 0;
-    results = [];
-    for (n = j = 0, len1 = values.length; j < len1; n = ++j) {
-      entry = values[n];
-      ref = colors[n % colors.length], r = ref[0], g = ref[1], b = ref[2];
-      color = "rgb(" + r + "," + g + "," + b + ")";
-      end = start + entry.value / total;
-      $('<div></div>').appendTo(this.legend).text(entry.label).css('border-color', color);
-      this.segment(start, end, color);
-      this.separator(end);
-      results.push(start = end);
-    }
-    return results;
-  };
-
-  Donut.prototype.separator = function(pos) {
-    var a, cx, cy, r1, r2, x1, x2, y1, y2;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    a = Math.PI * 2 * pos - Math.PI / 2;
-    cx = this.width / 2;
-    cy = this.height / 2;
-    x1 = cx + Math.cos(a) * r1;
-    y1 = cy + Math.sin(a) * r1;
-    x2 = cx + Math.cos(a) * r2;
-    y2 = cy + Math.sin(a) * r2;
-    this.ctx.beginPath();
-    this.ctx.moveTo(x1, y1);
-    this.ctx.lineTo(x2, y2);
-    return this.ctx.stroke();
-  };
-
-  Donut.prototype.segment = function(start, end, color) {
-    var r1, r2;
-    start = Math.PI * 2 * start - Math.PI / 2;
-    end = Math.PI * 2 * end - Math.PI / 2;
-    this.ctx.fillStyle = color;
-    r2 = Math.min(this.width, this.height) / 2;
-    r1 = r2 * 0.8;
-    this.ctx.beginPath();
-    this.ctx.arc(this.width / 2, this.height / 2, r2, start, end, false);
-    this.ctx.arc(this.width / 2, this.height / 2, r1, end, start, true);
-    return this.ctx.fill();
-  };
-
-  return Donut;
 
 })();
 });
