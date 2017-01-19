@@ -3,9 +3,9 @@ form.search{
     background-color: #3e3d3b;
     border-radius: 14px;
     margin: 10px;
-    padding: 0;
-    display: flex;
-
+    padding: 0px 35px 0px 0px;
+    position: relative;
+    
     input{
         color: white;
         padding-left: 14px;
@@ -13,7 +13,8 @@ form.search{
         outline: none;
         border: none;
         background: transparent;
-        flex-grow: 1;
+        display: inline-block;
+        width: 200px;
 
         &::-moz-placeholder{
             color: rgba(255,255,255,0.3);
@@ -34,8 +35,6 @@ form.search{
         }
     }
     button{
-        flex-grow: 0;
-        flex-shrink: 0;
         padding: 0;
         margin: 0;
         border: none;
@@ -47,6 +46,10 @@ form.search{
         background-image: url("/img/search.svg");
         background-repeat: no-repeat;
         opacity: 0.3;
+
+        position: absolute;
+        top: 0px;
+        right: 0px;
     }
 }
 

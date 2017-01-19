@@ -141,7 +141,7 @@ moduleManager = {
   }
 };
 moduleManager.module('/index', function(exports,sys){
-var Views, db, navLists, util;
+var Scroll, Views, db, navLists, util;
 
 navLists = [];
 
@@ -151,8 +151,10 @@ db = sys["import"]('views/db');
 
 util = sys["import"]('util');
 
+Scroll = sys["import"]('scroll');
+
 $(function() {
-  var path, query, views;
+  var path, query, scroll, views;
   views = new Views();
   document.addEventListener('click', function(event) {
     var anchor, href, ref, target;
@@ -170,9 +172,7 @@ $(function() {
       }
     }
   });
-  $('nav > div.content').slimScroll({
-    height: 'auto'
-  });
+  scroll = new Scroll($('nav > div.scroller')[0]);
   window.addEventListener('popstate', function() {
     var query;
     query = new URLSearchParams(document.location.search);
@@ -3529,6 +3529,85 @@ exports.index = function() {
   $('<h1>Page Not Found</h1>').appendTo(widget);
   return $('<p>\n    The page you requested could not be found.\n</p>').appendTo(widget);
 };
+});
+moduleManager.module('/scroll', function(exports,sys){
+var Scroll,
+  bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+
+exports.index = Scroll = (function() {
+  function Scroll(scroller) {
+    this.scroller = scroller;
+    this.update = bind(this.update, this);
+    this.onTouch = bind(this.onTouch, this);
+    this.scroller.addEventListener('touchstart', this.onTouch);
+    this.scroller.addEventListener('touchend', this.onTouch);
+    this.scroller.addEventListener('touchcancel', this.onTouch);
+    this.scrollbar = document.createElement('div');
+    this.style = this.scrollbar.style;
+    this.style.position = 'absolute';
+    this.style.opacity = '0';
+    this.style.transform = 'translateY(0px)';
+    this.style.transition = 'opacity 0.25s';
+    this.style.top = '0px';
+    this.style.right = '3px';
+    this.style.height = '100%';
+    this.style.backgroundColor = 'rgba(0,0,0,0.5)';
+    this.style.width = '4px';
+    this.style.borderRadius = '5px';
+    this.style.pointerEvents = 'none';
+    this.scroller.parentElement.appendChild(this.scrollbar);
+    this.paddingTop = getComputedStyle(this.scroller.parentElement).paddingTop;
+    this.paddingTop = parseInt(this.paddingTop.slice(0, this.paddingTop.length - 2), 10);
+    this.lastScrollTop = this.scroller.scrollTop;
+    this.lastScrolled = performance.now();
+    this.visible = false;
+    this.touching = false;
+    this.update();
+  }
+
+  Scroll.prototype.onTouch = function(event) {
+    if (event.touches.length > 0) {
+      return this.touching = true;
+    } else {
+      return this.touching = false;
+    }
+  };
+
+  Scroll.prototype.update = function() {
+    var height, offset, overflow, possibleScroll, scale, scroll, scrollHeight, scrollTop;
+    scrollTop = this.scroller.scrollTop;
+    if (scrollTop === this.lastScrollTop) {
+      if (this.visible && (!this.touching)) {
+        if (performance.now() - this.lastScrolled > 200) {
+          this.visible = false;
+          this.style.opacity = '0';
+        }
+      }
+    } else {
+      if (!this.visible) {
+        this.visible = true;
+        this.style.opacity = '1';
+      }
+      this.lastScrolled = performance.now();
+      scrollHeight = this.scroller.scrollHeight;
+      height = this.scroller.clientHeight;
+      possibleScroll = scrollHeight - height;
+      overflow = Math.max(Math.max(0, scrollTop) - scrollTop, Math.max(0, scrollTop - possibleScroll)) * 2.2;
+      scale = (height - overflow) / scrollHeight;
+      scroll = Math.min(1, Math.max(0, scrollTop / possibleScroll));
+      offset = (1 - scale) * scroll;
+      scale = scale * (height - 6);
+      offset = offset * (height - 6) + 3;
+      this.style.height = scale.toFixed(1) + 'px';
+      this.style.transform = 'translateY(' + (offset + this.paddingTop).toFixed(1) + 'px)';
+      this.lastScrollTop = scrollTop;
+    }
+    return requestAnimationFrame(this.update);
+  };
+
+  return Scroll;
+
+})();
 });
 moduleManager.index();
 })();

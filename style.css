@@ -418,6 +418,7 @@ li {
 a {
   color: inherit;
   text-decoration: none;
+  outline: none;
 }
 html {
   font-family: 'Source Sans Pro';
@@ -554,10 +555,21 @@ body > nav {
   padding-top: 60px;
   background-color: #2b333a;
   z-index: 1;
+  overflow: hidden;
+}
+body > nav div.scroller {
+  width: 280px;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  /* momentum scroll mobile, works in safari, default on chrome */
+  scroll-behavior: smooth;
+  /* seems to have no effect but is what I want */
 }
 body > nav div.content {
-  height: 100%;
-  padding-bottom: 60px;
+  margin-bottom: 80px;
+  width: 260px;
 }
 body > nav div.content > div {
   border-bottom: 1px solid #202020;
@@ -938,8 +950,8 @@ form.search {
   background-color: #3e3d3b;
   border-radius: 14px;
   margin: 10px;
-  padding: 0;
-  display: flex;
+  padding: 0px 35px 0px 0px;
+  position: relative;
 }
 form.search input {
   color: white;
@@ -948,7 +960,8 @@ form.search input {
   outline: none;
   border: none;
   background: transparent;
-  flex-grow: 1;
+  display: inline-block;
+  width: 200px;
 }
 form.search input::-moz-placeholder {
   color: rgba(255, 255, 255, 0.3);
@@ -967,8 +980,6 @@ form.search input:placeholder {
   font-weight: bold;
 }
 form.search button {
-  flex-grow: 0;
-  flex-shrink: 0;
   padding: 0;
   margin: 0;
   border: none;
@@ -980,6 +991,9 @@ form.search button {
   background-image: url("/img/search.svg");
   background-repeat: no-repeat;
   opacity: 0.3;
+  position: absolute;
+  top: 0px;
+  right: 0px;
 }
 main > div.search-result {
   display: flex;

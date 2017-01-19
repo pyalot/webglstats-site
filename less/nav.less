@@ -41,9 +41,20 @@ body > nav{
     background-color: @medium;
     z-index: 1;
 
-    div.content{
+    overflow: hidden;
+
+    div.scroller{
+        width: @sidebarWidth+20px;
         height: 100%;
-        padding-bottom: 60px;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch; /* momentum scroll mobile, works in safari, default on chrome */
+        scroll-behavior: smooth; /* seems to have no effect but is what I want */
+    }
+
+    div.content{
+        margin-bottom: 80px;
+        width: @sidebarWidth;
 
         > div{
             border-bottom: 1px solid rgb(32,32,32);

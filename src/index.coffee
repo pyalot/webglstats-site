@@ -2,6 +2,7 @@ navLists = []
 Views = sys.import 'views'
 db = sys.import 'views/db'
 util = sys.import 'util'
+Scroll = sys.import 'scroll'
 
 $ ->
     views = new Views()
@@ -19,7 +20,8 @@ $ ->
                 history.pushState(null, null, href)
                 views.handle(href)
 
-    $('nav > div.content').slimScroll(height:'auto')
+    #$('nav > div.content').slimScroll(height:'auto')
+    scroll = new Scroll($('nav > div.scroller')[0])
 
     window.addEventListener 'popstate', ->
         query = new URLSearchParams(document.location.search)
