@@ -175,7 +175,7 @@ exports.index =
         versions: [1,2]
     WEBGL_compressed_texture_etc:
         description: '''
-            Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.
+            Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC2 and EAC</a>.
         '''
         status: 'community'
         versions: [1,2]
