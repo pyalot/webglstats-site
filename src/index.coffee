@@ -4,8 +4,8 @@ db = sys.import 'views/db'
 util = sys.import 'util'
 Scroll = sys.import 'scroll'
 
-$ ->
-    views = new Views()
+load = ->
+    views = new Views(document.webglstats.meta)
 
     document.addEventListener 'click', (event) ->
         if event.ctrlKey or event.shiftKey or event.metaKey or event.altKey
@@ -46,12 +46,12 @@ $ ->
         event.preventDefault()
         event.stopPropagation()
 
+    date = document.webglstats.meta.webgl1.lastChunk
+    [year, month, day] = date.split('-')
+    $('header > span.updated').text('Last update: ' + util.formatDate(year, month, day))
 
-    db.execute
-        query:
-            series: 'daily'
-            start: -2
-        success: (result) ->
-            date = result.values[1].name
-            [year, month, day] = date.split('-')
-            $('header > span.updated').text('Last update: ' + util.formatDate(year, month, day))
+if document.webglstats.domready and document.webglstats.meta?
+    document.webglstats.loaded = true
+    load()
+else
+    document.webglstats.load = load

@@ -8,11 +8,11 @@ db = sys.import 'db'
 notFound = sys.import 'not-found'
 
 exports.index = class Views
-    constructor: ->
-        db.init()
+    constructor: (dbmeta) ->
+        db.init(dbmeta)
 
         @search = new Search()
-        @filter = new Filter('#filter')
+        @filter = new Filter('#filter', dbmeta)
         @main = new Main(@filter, @search)
         @parameters = new Parameters(@filter, @search)
         @extensions = new Extensions(@filter, @search)

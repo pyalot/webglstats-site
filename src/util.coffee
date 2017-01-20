@@ -48,3 +48,13 @@ monthNames = [
 exports.formatDate = (year, month, day) ->
     month = parseInt(month, 10)-1
     return "#{day} #{monthNames[month]}. #{year}"
+
+exports.getJSON = ({url, success, error}) ->
+    xhr = new XMLHttpRequest()
+    xhr.open('GET', url)
+    xhr.onload = ->
+        data = JSON.parse(xhr.response)
+        success(data)
+    xhr.onerror = ->
+        error()
+    xhr.send()

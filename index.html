@@ -1,6 +1,32 @@
 <!doctype html>
 <html lang="en">
     <head>
+        <script>(function(){
+            var webglstats = document.webglstats = {domready:false, meta:null, load:null, loaded:false};
+            var load = function(){
+                if(!webglstats.loaded && webglstats.domready && webglstats.meta !== null && webglstats.load !== null){
+                    webglstats.loaded = true;
+                    webglstats.load();
+                }
+            }
+            document.addEventListener('DOMContentLoaded', function(){
+                document.webglstats.domready = true;
+                load();
+            });
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', 'https://data.webglstats.com/meta')
+            xhr.onload = function(){
+                try{ document.webglstats.meta = JSON.parse(xhr.response); }
+                catch(error){ document.webglstats.meta = 'error'; }
+                load();
+            };
+            xhr.onerror = function(){
+                document.webglstats.meta = 'error';
+                load();
+            };
+            xhr.send();
+
+        })();</script>
         <title>WebGL Stats</title>
         <link rel="shortcut icon" href="/img/favicon.png">
 
