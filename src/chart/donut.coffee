@@ -27,7 +27,7 @@ exports.index = class Donut
             .appendTo(@elem)
 
     update: (values) ->
-        values.sort (a, b) -> b.value - a.value
+        values.sort (a, b) -> b.label - a.label
         values = values.filter (entry) -> entry.value > 0
 
         @legend.empty()
