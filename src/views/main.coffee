@@ -2,6 +2,7 @@ db = sys.import 'db'
 extensions = sys.import 'extensions'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
+breadcrumbs = sys.import 'breadcrumbs'
 Parameters = sys.import 'parameters'
 {Donut, Gauge, Series} = sys.import '/chart'
 
@@ -49,20 +50,9 @@ exports.index = class Main
         </p>''').appendTo(widget)
 
     breadcrumbs: (webglVersion) ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<a></a>')
-            .attr('href', '/' + util.versionPath(webglVersion))
-            .text(util.versionLabel(webglVersion))
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs [
+            [util.versionLabel(webglVersion), "/#{util.versionPath(webglVersion)}"]
+        ]
 
     show: (version, breadcrumbs=true) ->
         behavior.deactivate()

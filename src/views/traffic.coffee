@@ -1,6 +1,7 @@
 db = sys.import 'db'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
+breadcrumbs = sys.import 'breadcrumbs'
 {Gauge, Series, Donut, StackedPercentage} = sys.import '/chart'
 
 exports.index = class Traffic
@@ -8,20 +9,9 @@ exports.index = class Traffic
         null
     
     breadcrumbs: ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-        
-        $('<a></a>')
-            .attr('href', '/traffic')
-            .text('Visitors')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs [
+            ['Visitors', '/traffic']
+        ]
 
     show: ->
         behavior.deactivate()

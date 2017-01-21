@@ -7,6 +7,7 @@ Filter = sys.import 'filter'
 Search = sys.import 'search'
 db = sys.import 'db'
 notFound = sys.import 'not-found'
+breadcrumbs = sys.import 'breadcrumbs'
 
 exports.index = class Views
     constructor: (dbmeta) ->
@@ -21,14 +22,7 @@ exports.index = class Views
         @contributors = new Contributors()
 
     breadcrumbs: ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs []
 
     handle: (path, query, pageload=false) ->
         $('main').empty()

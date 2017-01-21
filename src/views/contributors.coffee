@@ -1,6 +1,7 @@
 db = sys.import 'db'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
+breadcrumbs = sys.import 'breadcrumbs'
 
 referrers = '''
 glad.dav1d.de
@@ -67,20 +68,9 @@ exports.index = class Contributors
         null
     
     breadcrumbs: ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-        
-        $('<a></a>')
-            .attr('href', '/contributors')
-            .text('Contributors')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs [
+            ['Contributors', '/contributors']
+        ]
 
     show: ->
         behavior.deactivate()

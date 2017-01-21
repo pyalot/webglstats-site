@@ -3,6 +3,7 @@ util = sys.import '/util'
 NavlistExpand = sys.import 'navlist'
 {StackedPercentage, Bar} = sys.import '/chart'
 notFound = sys.import 'not-found'
+breadcrumbs = sys.import 'breadcrumbs'
 
 info =
     ALIASED_LINE_WIDTH_RANGE:
@@ -284,29 +285,11 @@ exports.index = class Parameters
             type: "#{util.versionLabel(version)} Parameter"
     
     breadcrumbs: (webglVersion, name) ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<a></a>')
-            .attr('href', '/' + util.versionPath(webglVersion))
-            .text(util.versionLabel(webglVersion))
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<li>Parameter</li>')
-            .appendTo(breadcrumbs)
-        
-        $('<a></a>')
-            .attr('href', "/#{util.versionPath(webglVersion)}/parameter/#{name}")
-            .text(name)
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs [
+            [util.versionLabel(webglVersion), "/#{util.versionPath(webglVersion)}"]
+            'Parameter'
+            [name, "/#{util.versionPath(webglVersion)}/parameter/#{name}"]
+        ]
 
     show: (webglVersion, name, pageload) ->
         meta = info[name]

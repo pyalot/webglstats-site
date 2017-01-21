@@ -1,4 +1,5 @@
 behavior = sys.import 'behavior'
+breadcrumbs = sys.import 'breadcrumbs'
 
 exports.index = class Search
     constructor: ->
@@ -11,17 +12,9 @@ exports.index = class Search
         @entries = {}
     
     breadcrumbs: ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<li>Search</li>')
-            .appendTo(breadcrumbs)
+        breadcrumbs [
+            'Search'
+        ]
 
     show: (query, instant) ->
         @breadcrumbs()

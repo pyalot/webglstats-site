@@ -4,6 +4,7 @@ util = sys.import '/util'
 NavlistExpand = sys.import '../navlist'
 info = sys.import 'info'
 notFound = sys.import '../not-found'
+breadcrumbs = sys.import '../breadcrumbs'
 
 extensionLabel = (name) ->
     parts = name.split('_')
@@ -63,29 +64,11 @@ exports.index = class Extensions
                 @gauge(version, entry.name)
 
     breadcrumbs: (webglVersion, name) ->
-        breadcrumbs = $('<ol class="breadcrumbs"></ol>')
-            .appendTo('main')
-        
-        $('<a></a>')
-            .attr('href', '/')
-            .text('Home')
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<a></a>')
-            .attr('href', '/' + util.versionPath(webglVersion))
-            .text(util.versionLabel(webglVersion))
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
-
-        $('<li>Extension</li>')
-            .appendTo(breadcrumbs)
-        
-        $('<a></a>')
-            .attr('href', "/#{util.versionPath(webglVersion)}/extension/#{name}")
-            .text(name)
-            .appendTo(breadcrumbs)
-            .wrap('<li></li>')
+        breadcrumbs [
+            [util.versionLabel(webglVersion), "/#{util.versionPath(webglVersion)}"]
+            'Extension'
+            [name, "/#{util.versionPath(webglVersion)}/extension/#{name}"]
+        ]
 
     show: (webglVersion, name, pageload) ->
         meta = info[name]
