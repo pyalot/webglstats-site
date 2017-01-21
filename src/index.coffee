@@ -4,7 +4,21 @@ db = sys.import 'views/db'
 util = sys.import 'util'
 Scroll = sys.import 'scroll'
 
+backendError = ->
+    widget = $('<div class="full box"></div>')
+        .appendTo('main')
+
+    $('<h1>Data Backend Maintenance</h1>')
+        .appendTo(widget)
+
+    $('<p>The data backend is under maintenance, please try later.</p>')
+        .appendTo(widget)
+
 load = ->
+    if document.webglstats.meta == 'error'
+        backendError()
+        return
+
     views = new Views(document.webglstats.meta)
 
     document.addEventListener 'click', (event) ->
