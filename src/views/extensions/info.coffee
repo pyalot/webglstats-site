@@ -32,12 +32,15 @@ exports.index =
     WEBGL_compressed_texture_atc:
         description: '''
             Offers compressed texture format support for <a href="https://www.khronos.org/registry/gles/extensions/AMD/AMD_compressed_ATC_texture.txt">ATC</a>.
+            <br/><br/>
         '''
         status: 'community'
         versions: [1,2]
     WEBGL_compressed_texture_etc1:
         description: '''
             Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC1</a>.
+            <br/><br/>
+            <span class="warning">Warning DO NOT USE.</span> Often implemented in browsers by decompressing on the CPU and uploading full size to GPU with severe performance, vram and quality impacts.
         '''
         status: 'community'
         versions: [1,2]
@@ -179,6 +182,8 @@ exports.index =
     WEBGL_compressed_texture_etc:
         description: '''
             Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Ericsson_Texture_Compression">ETC2 and EAC</a>.
+            <br/><br/>
+            <span class="warning">Warning DO NOT USE.</span> Often implemented in browsers by decompressing on the CPU and uploading full size to GPU with severe performance, vram and quality impacts.
         '''
         status: 'community'
         versions: [1,2]

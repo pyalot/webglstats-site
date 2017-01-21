@@ -115,3 +115,19 @@ div.jqstooltip{
 .notransition{
     transition: none !important;
 }
+    
+@keyframes warnPulse{
+    from{
+        color: #ffffff;
+    }
+    to{
+        color: #ff0000;
+    }
+}
+
+.warning{
+    animation-duration: 0.25s;
+    animation-name: warnPulse;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
