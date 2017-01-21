@@ -11,26 +11,35 @@ exports.index = class Gauge
     constructor: ({size,label}) ->
         size ?= 'small'
 
+        step = (start, end, value) =>
+            if isNaN(value)
+                value = 0
+
+            percent.textContent = "#{value.toFixed(0)}%"
+
+            f = value / 100
+
+            c0 = Math.min(Math.floor(f*2), 1)
+            c1 = c0+1
+            f = (f%0.5)*2
+            c0 = colorStops[c0]
+            c1 = colorStops[c1]
+
+            r = mix(c0[0], c1[0], f)
+            g = mix(c0[1], c1[1], f)
+            b = mix(c0[2], c1[2], f)
+
+            @chart.options.barColor = "rgb(#{r},#{g},#{b})"
+
         @elem = $('<div class="gauge"></div>')
             .addClass(size)
             .easyPieChart
                 animate: 1000
-                onStep: (start, end, value) =>
-                    percent.textContent = "#{value.toFixed(0)}%"
-
-                    f = value / 100
-
-                    c0 = Math.min(Math.floor(f*2), 1)
-                    c1 = c0+1
-                    f = (f%0.5)*2
-                    c0 = colorStops[c0]
-                    c1 = colorStops[c1]
-
-                    r = mix(c0[0], c1[0], f)
-                    g = mix(c0[1], c1[1], f)
-                    b = mix(c0[2], c1[2], f)
-
-                    @chart.options.barColor = "rgb(#{r},#{g},#{b})"
+                onStart: =>
+                    step(null, null, 0)
+                onStep: step
+                onStop: =>
+                    step(null, null, 100)
 
                 lineWidth: 8
                 #barColor: '#15ecff'
