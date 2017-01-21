@@ -57,6 +57,7 @@ exports.index = class Views
 
                 if not webglVersion?
                     notFound()
+                    return
 
                 switch category
                     when 'parameter' then @parameters.show(webglVersion, name, pageload)
