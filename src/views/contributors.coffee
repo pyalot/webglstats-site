@@ -6,9 +6,7 @@ referrers = '''
 glad.dav1d.de
 mappable.com
 beta.archilogic.com
-tryon.io
 webglfundamentals.org
-verold.com
 stephaneginier.com
 urbangalaxyonline.com
 g-truc.net
@@ -16,7 +14,6 @@ field.io
 zephyrosanemos.com
 gootechnologies.com
 pheelicks.com
-artillery.com
 dghost.net
 robrowser.com
 yobi3d.com
@@ -32,7 +29,6 @@ acko.net
 threejs.org
 voxelquest.com
 blend4web.com
-khronos.org
 playcanvas.com
 clara.io
 mrdoob.com
@@ -46,12 +42,10 @@ cesiumjs.org
 codeflow.org
 3dthis.com
 gootechnologies.com
-webglstats.com
 marcinignac.com
 turbulenz.com
 bfilipek.com
 webglreport.com
-lolbrothers.com
 wellcaffeinated.net
 tigraphics.blogspot.com
 spacegoo.com
@@ -60,7 +54,6 @@ snappymaria.com
 renderingpipeline.com
 south.im
 laugharne.me
-germanmentalray.org
 threedeemedia.com
 threejs.ru
 ramsol.in
