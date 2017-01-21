@@ -25,7 +25,10 @@ exports.index =
             Offers compressed texture format support for <a href="https://en.wikipedia.org/wiki/Adaptive_Scalable_Texture_Compression">ASTC</a>
         '''
         status: 'community'
-        versions: [1.2]
+        versions: [1,2]
+        params: [
+            {name:'supportedProfiles',nullable:true,type:'rel'}
+        ]
     WEBGL_compressed_texture_atc:
         description: '''
             Offers compressed texture format support for <a href="https://www.khronos.org/registry/gles/extensions/AMD/AMD_compressed_ATC_texture.txt">ATC</a>.

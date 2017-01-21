@@ -157,7 +157,7 @@ exports.index = class Extensions
                     .appendTo('main')
 
                 $('<h1></h1>')
-                    .text(param)
+                    .text(param.name ? param)
                     .appendTo(widget)
                 @stackedPercentage(webglVersion, name, param)
                     .appendTo(widget)
@@ -244,8 +244,14 @@ exports.index = class Extensions
         return chart.elem
 
     stackedPercentage: (webglVersion, name, param) ->
+        if typeof(param) == 'string'
+            param =
+                name:param
+                type:'abs'
+                nullable:'false'
+
         extname = "webgl.extensions.#{name}"
-        fieldname = "#{extname}.#{param}"
+        fieldname = "#{extname}.#{param.name}"
         chart = new StackedPercentage()
 
         @filter.onChange chart.elem, =>
@@ -266,12 +272,17 @@ exports.index = class Extensions
                     keys = result.keys
                     xLabels = []
                     data = []
-                    
-                    if keys[0] == null
-                        valueStart = 1
-                        keys.shift()
-                    else
+    
+                    if param.nullable
+                        if keys[0] == null
+                            keys[0] = 'Unknown'
                         valueStart = 0
+                    else
+                        if keys[0] == null
+                            valueStart = 1
+                            keys.shift()
+                        else
+                            valueStart = 0
 
                     for item in result.values
                         xLabels.push(item.name)
@@ -286,6 +297,7 @@ exports.index = class Extensions
                         data.push(values)
 
                     chart.update
+                        type: param.type
                         areaLabels: keys
                         xLabels: xLabels
                         data: data
