@@ -33,7 +33,7 @@ exports.index = class Main
         ''').appendTo(widget)
 
         $('''<p>
-            If you want to contribute collecting the data just embedd the code below into your page.
+            If you want to contribute collecting the data just embed the code below into your page.
         </p>''').appendTo(widget)
 
         
