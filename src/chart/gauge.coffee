@@ -35,11 +35,11 @@ exports.index = class Gauge
             .addClass(size)
             .easyPieChart
                 animate: 1000
-                onStart: =>
-                    step(null, null, 0)
+                #onStart: =>
+                #    step(null, null, 0)
                 onStep: step
-                onStop: =>
-                    step(null, null, 100)
+                #onStop: => #that's wrong of course
+                #    step(null, null, 100)
 
                 lineWidth: 8
                 #barColor: '#15ecff'
