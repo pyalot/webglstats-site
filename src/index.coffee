@@ -15,9 +15,9 @@ backendError = ->
         .appendTo(widget)
 
 load = ->
-    if document.webglstats.meta == 'error'
-        backendError()
-        return
+    #if document.webglstats.meta == 'error'
+    #    backendError()
+    #    return
 
     views = new Views(document.webglstats.meta)
 
