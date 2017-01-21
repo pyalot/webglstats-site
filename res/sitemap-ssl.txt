@@ -1,6 +1,7 @@
 https://webglstats.com/
 https://webglstats.com/search
 https://webglstats.com/traffic
+https://webglstats.com/contributors
 https://webglstats.com/webgl
 https://webglstats.com/webgl/parameter/ALIASED_LINE_WIDTH_RANGE
 https://webglstats.com/webgl/parameter/ALIASED_POINT_SIZE_RANGE

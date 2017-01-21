@@ -21,6 +21,18 @@ exports.index = class Main
         </p>''').appendTo(widget)
         
         $('''<p>
+            Without <a href="/contributors">contributing sites</a> WebGL stats would be impossible. A special thanks to:<br/>
+        </p>''').appendTo(widget)
+
+        $(''' 
+            <div class="credit-logos">
+                <a href="https://sketchfab.com/"><img alt="sketchfab" src="/img/referrers/sketchfab.png"></a>
+                <a href="http://mrdoob.com/"><img alt="mrdoob" src="/img/referrers/mrdoob.svg"></a>
+                <a href="https://playcanvas.com/"><img alt="playcanvas" src="/img/referrers/playcanvas.png"></a>
+            </div>
+        ''').appendTo(widget)
+
+        $('''<p>
             If you want help collecting data just embedd the code below into your page.
         </p>''').appendTo(widget)
 

@@ -2,6 +2,7 @@ Parameters = sys.import 'parameters'
 Extensions = sys.import 'extensions'
 Main = sys.import 'main'
 Traffic = sys.import 'traffic'
+Contributors = sys.import 'contributors'
 Filter = sys.import 'filter'
 Search = sys.import 'search'
 db = sys.import 'db'
@@ -17,6 +18,7 @@ exports.index = class Views
         @parameters = new Parameters(@filter, @search)
         @extensions = new Extensions(@filter, @search)
         @traffic = new Traffic(@filter, @search)
+        @contributors = new Contributors()
 
     breadcrumbs: ->
         breadcrumbs = $('<ol class="breadcrumbs"></ol>')
@@ -48,6 +50,8 @@ exports.index = class Views
             when '/webgl2'
                 @main.show('webgl2')
                 @extensions.overview('webgl2', pageload)
+            when '/contributors'
+                @contributors.show()
             else
                 path = path[1...]
                 parts = path.split('/')
