@@ -1,3 +1,5 @@
+util = sys.import '/util'
+
 mix = (a, b, f) ->
     return Math.round(a*(1-f) + b*f).toFixed(0)
 
@@ -35,11 +37,11 @@ exports.index = class Gauge
             .addClass(size)
             .easyPieChart
                 animate: 1000
-                #onStart: =>
-                #    step(null, null, 0)
+                onStart: (start, end) =>
+                    step(null, null, start)
                 onStep: step
-                #onStop: => #that's wrong of course
-                #    step(null, null, 100)
+                onStop: (start, end) =>
+                    step(null, null, end)
 
                 lineWidth: 8
                 #barColor: '#15ecff'
@@ -59,12 +61,16 @@ exports.index = class Gauge
                 .appendTo(@elem)
 
         @chart = @elem.data('easyPieChart')
+        @chart.disableAnimation()
+        @chart.update(0)
+        @chart.enableAnimation()
 
     setLabel: (text) ->
         if @label?
             @label.text(text)
 
     update: (value) ->
-        if isNaN(value)
-            value = 0
-        @chart.update(value)
+        util.after 0.01, =>
+            if isNaN(value)
+                value = 0
+            @chart.update(value)
