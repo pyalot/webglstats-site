@@ -166,7 +166,7 @@ exports.index = class Extensions
                 .appendTo(container)
 
             $('<a class="label"></a>')
-                .attr('href', "/webgl/extension/#{entry.name}")
+                .attr('href', "/#{util.versionPath(webglVersion)}/extension/#{entry.name}")
                 .text(entry.label)
                 .appendTo(container)
 
