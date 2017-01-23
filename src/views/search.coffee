@@ -10,6 +10,8 @@ exports.index = class Search
             @ref 'id'
 
         @entries = {}
+   
+        #FIXME
     
     breadcrumbs: ->
         breadcrumbs [
@@ -19,7 +21,7 @@ exports.index = class Search
     show: (query, instant) ->
         @breadcrumbs()
 
-        query = query.get('query')
+        search = query.query ? ''
         results = @index.search(query)
 
         behavior.deactivate()
@@ -33,7 +35,7 @@ exports.index = class Search
 
         $('<span class="query"></span>')
             .appendTo(widget)
-            .text('"' + query + '". ')
+            .text('"' + search + '". ')
 
         $("<span>#{results.length} results found.</span>")
             .appendTo(widget)

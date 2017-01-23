@@ -51,23 +51,12 @@ exports.index = class Node
             @checkChange()
         
     check: ->
-        if @checkbox?
-            @checkbox
-                .removeClass('unchecked')
-                .removeClass('semichecked')
-                .addClass('checked')
-
         @setStatus 'checked'
 
         for child in @children
             child.check()
 
     uncheck: ->
-        if @checkbox?
-            @checkbox
-                .addClass('unchecked')
-                .removeClass('semichecked')
-                .removeClass('checked')
         @setStatus 'unchecked'
 
         for child in @children
@@ -95,6 +84,28 @@ exports.index = class Node
             @parent.updateCheck()
 
         @checkChange()
+
+    updateStatus: ->
+        if @children? and @children.length > 0
+            allChecked = true
+            noneChecked = true
+
+            for child in @children
+                status = child.updateStatus()
+                if status == 'checked' or child.status == 'semichecked'
+                    noneChecked = false
+
+                if status != 'checked'
+                    allChecked = false
+
+            if allChecked
+                @setStatus 'checked'
+            else if noneChecked
+                @setStatus 'unchecked'
+            else
+                @setStatus 'semichecked'
+
+        return @status
 
     setStatus: (@status) ->
         if @checkbox?
@@ -133,3 +144,8 @@ exports.index = class Node
             fun(@)
             for child in @children
                 child.visitActive(fun)
+
+    visit: (fun) ->
+        fun(@)
+        for child in @children
+            child.visit(fun)

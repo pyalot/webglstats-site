@@ -1,6 +1,7 @@
 db = sys.import 'db'
 util = sys.import '/util'
 behavior = sys.import 'behavior'
+hex = sys.import 'hex'
 Tree = sys.import 'tree'
 
 addNode = (parent, parts, count, key) ->
@@ -80,10 +81,22 @@ class Radio
         @change(@value)
 
 exports.index = class Filter
-    constructor: (parent) ->
-        behavior.collapsable(@)
+    constructor: (parent, @app) ->
+        for field in @app.dbmeta.webgl1.fields
+            if field.name == 'platform'
+                @platformBits = {}
+                @platformList = field.values
+                @platformBitCount = field.values.length
+                @platformByteCount = Math.ceil(@platformBitCount/8)
+                for name, i in field.values
+                    @platformBits[name] = i
+                break
+
+        #behavior.collapsable(@)
         @parent = $(parent)
         @link = @parent.find('a')
+        @indicator = @link.find('span.indicator')
+        @nodesByKey = {}
 
         @container = $('<div class="filter"></div>')
             .appendTo(@parent)
@@ -104,7 +117,6 @@ exports.index = class Filter
 
         @treeContainer = $('<div class="tree"></div>')
             .appendTo(@content)
-
         
         @container.css('display', 'block')
         @container[0].style.height = '0px'
@@ -123,12 +135,37 @@ exports.index = class Filter
 
                 for item in tree.children
                     @addNode @tree, tree, item
+
+                @tree.updateStatus()
         
                 @height = util.measureHeight(@container[0])
 
-        @platforms = null
-
+        @platforms = @decodeQueryBits(@app.location.platforms)
+        @updateIndicator()
         @listeners = []
+
+    updateIndicator: ->
+        if @platforms?
+            @indicator.show()
+        else
+            @indicator.hide()
+
+    set: (platforms) ->
+        @platforms = @decodeQueryBits(platforms)
+        @updateIndicator()
+
+        if @platforms?
+            for platform, node of @nodesByKey
+                if platform in @platforms
+                    node.setStatus('checked')
+                else
+                    node.setStatus('unchecked')
+        else
+            for platform, node of @nodesByKey
+                node.setStatus('checked')
+
+        @tree.updateStatus()
+        @notifyListeners()
 
     onChange: (elem, listener) ->
         @listeners.push(elem:elem, change:listener)
@@ -149,14 +186,49 @@ exports.index = class Filter
     filterChanged: =>
         if @tree.status == 'checked'
             @platforms = null
+            @updateIndicator()
+            @queryBits = null
+            @app.location.setFilter(null)
         else
             values = []
             @tree.visitActive (node) ->
                 if node.key?
                     values.push(node.key)
             @platforms = values
+            @updateIndicator()
+            bits = @encodeQueryBits(@platforms)
+            @app.location.setFilter(bits)
 
         @notifyListeners()
+
+    encodeQueryBits: (platforms) ->
+        bits = new Uint8Array(@platformByteCount)
+        for name in platforms
+            bitNum = @platformBits[name]
+            byte = Math.floor(bitNum/8)
+            bit = bitNum % 8
+            bits[byte] |= 1 << bit
+        bits = hex.encode(bits)
+
+        return '0000' + bits #reserved 2 bytes at the front for future use
+
+    decodeQueryBits: (bits) ->
+        if not bits?
+            return null
+
+        bits = bits[4...] # reserved 2 bytes at the front for future use
+
+        bits = hex.decode(bits)
+        platforms = []
+        for value, byte in bits
+            for bit in [0...8]
+                bitNum = byte*8 + bit
+                if bitNum >= @platformList.length
+                    break
+
+                if value & (1<<bit)
+                    platforms.push @platformList[bitNum]
+        return platforms
 
     addNode: (parentNode, dataParent, dataChild, depth=0) ->
         name = dataChild.name + ' ' + Math.round(dataChild.count*100/dataParent.count).toFixed(0) + '%'
@@ -166,6 +238,10 @@ exports.index = class Filter
                 @addNode childNode, dataChild, item, depth+1
         else
             childNode.key = dataChild.key
+            @nodesByKey[dataChild.key] = childNode
+            if @platforms?
+                if childNode.key not in @platforms
+                    childNode.setStatus('unchecked')
     
     toggle: =>
         if @expanded
@@ -174,7 +250,7 @@ exports.index = class Filter
             @expand()
 
     expand: (instant=false) ->
-        behavior.collapse(@)
+        #behavior.collapse(@)
         @parent.addClass('expanded')
 
         @expanded = true

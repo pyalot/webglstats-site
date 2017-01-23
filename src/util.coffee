@@ -58,3 +58,16 @@ exports.getJSON = ({url, success, error}) ->
     xhr.onerror = ->
         error()
     xhr.send()
+
+exports.iter2list = (iterator) ->
+    result = []
+    while 1
+        item = iterator.next()
+        if item?
+            if item.done
+                break
+            else
+                result.push item.value
+        else
+            break
+    return result

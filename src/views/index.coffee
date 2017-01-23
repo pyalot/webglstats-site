@@ -10,32 +10,35 @@ notFound = sys.import 'not-found'
 breadcrumbs = sys.import 'breadcrumbs'
 
 exports.index = class Views
-    constructor: (dbmeta) ->
-        db.init(dbmeta)
+    constructor: (@app) ->
+        db.init(@app.dbmeta)
 
         @search = new Search()
-        @filter = new Filter('#filter', dbmeta)
+        @filter = new Filter('#filter', @app)
         @main = new Main(@filter, @search)
         @parameters = new Parameters(@filter, @search)
         @extensions = new Extensions(@filter, @search)
         @traffic = new Traffic(@filter, @search)
         @contributors = new Contributors()
 
+    setFilter: (platforms) ->
+        @filter.set(platforms)
+
     breadcrumbs: ->
         breadcrumbs []
 
-    handle: (path, query, pageload=false) ->
+    handle: (location, pageload=false) ->
         $('main').empty()
         $('body').removeClass('sidebar')
 
-        switch path
+        switch location.path
             when '/'
                 @breadcrumbs()
                 @main.showInfo()
                 @main.show('webgl1', false)
                 @main.show('webgl2', false)
             when '/search'
-                @search.show(query, pageload)
+                @search.show(location.query, pageload)
             when '/traffic'
                 @traffic.show()
             when '/webgl'
@@ -47,7 +50,7 @@ exports.index = class Views
             when '/contributors'
                 @contributors.show()
             else
-                path = path[1...]
+                path = location.path[1...]
                 parts = path.split('/')
                 webglVersion = ({webgl:'webgl1', webgl2:'webgl2'})[parts.shift()]
                 category = parts.shift()
