@@ -1,3 +1,19 @@
+.placeholder(@rules){
+    &::-moz-placeholder{
+        @rules();
+    }
+    &:-ms-input-placeholder{
+        @rules();
+    }
+    &::-webkit-input-placeholder{
+        @rules();
+    }
+
+    &:placeholder{
+        @rules();
+    }
+}
+
 form.search{
     border: 1px solid @medium;
     background-color: #3e3d3b;
@@ -5,7 +21,7 @@ form.search{
     margin: 10px;
     padding: 0px 35px 0px 0px;
     position: relative;
-    
+
     input{
         color: white;
         padding-left: 14px;
@@ -14,25 +30,22 @@ form.search{
         border: none;
         background: transparent;
         display: inline-block;
-        width: 200px;
+        width: 202px;
+        border-radius: 14px 0px 0px 14px;
+        transition: background-color 0.3s, color 0.3s;
 
-        &::-moz-placeholder{
-            color: rgba(255,255,255,0.3);
-            font-weight: bold;
-        }
-        &:-ms-input-placeholder{
-            color: rgba(255,255,255,0.3);
-            font-weight: bold;
-        }
-        &::-webkit-input-placeholder{
-            color: rgba(255,255,255,0.3);
-            font-weight: bold;
+        &:focus{
+            background-color: rgb(230,230,230);
+            color: #222;
+            .placeholder({
+                color: rgba(0,0,0,0.3);
+            })
         }
 
-        &:placeholder{
+        .placeholder({
             color: rgba(255,255,255,0.3);
-            font-weight: bold;
-        }
+            transition: color 0.3s;
+        })
     }
     button{
         padding: 0;
@@ -50,6 +63,12 @@ form.search{
         position: absolute;
         top: 0px;
         right: 0px;
+        cursor: pointer;
+        transition: opacity 0.3s;
+
+        &:hover{
+            opacity: 0.5;
+        }
     }
 }
 

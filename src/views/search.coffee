@@ -11,8 +11,6 @@ exports.index = class Search
 
         @entries = {}
    
-        #FIXME
-    
     breadcrumbs: ->
         breadcrumbs [
             'Search'
@@ -22,7 +20,7 @@ exports.index = class Search
         @breadcrumbs()
 
         search = query.query ? ''
-        results = @index.search(query)
+        results = @index.search(search)
 
         behavior.deactivate()
         behavior.collapse()
