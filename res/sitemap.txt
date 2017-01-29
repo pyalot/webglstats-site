@@ -29,6 +29,7 @@ http://webglstats.com/webgl/extension/WEBGL_compressed_texture_etc
 http://webglstats.com/webgl/extension/WEBGL_compressed_texture_etc1
 http://webglstats.com/webgl/extension/WEBGL_compressed_texture_pvrtc
 http://webglstats.com/webgl/extension/WEBGL_compressed_texture_s3tc
+http://webglstats.com/webgl/extension/WEBGL_compressed_texture_astc
 http://webglstats.com/webgl/extension/WEBGL_debug_renderer_info
 http://webglstats.com/webgl/extension/WEBGL_depth_texture
 http://webglstats.com/webgl/extension/EXT_disjoint_timer_query
@@ -98,9 +99,10 @@ http://webglstats.com/webgl2/extension/WEBGL_compressed_texture_etc
 http://webglstats.com/webgl2/extension/WEBGL_compressed_texture_etc1
 http://webglstats.com/webgl2/extension/WEBGL_compressed_texture_pvrtc
 http://webglstats.com/webgl2/extension/WEBGL_compressed_texture_s3tc
+http://webglstats.com/webgl2/extension/WEBGL_compressed_texture_astc
 http://webglstats.com/webgl2/extension/WEBGL_debug_renderer_info
 http://webglstats.com/webgl2/extension/EXT_disjoint_timer_query
-http://webglstats.com/extension/EXT_disjoint_timer_query_webgl2
+http://webglstats.com/webgl2/extension/EXT_disjoint_timer_query_webgl2
 http://webglstats.com/webgl2/extension/WEBGL_lose_context
 http://webglstats.com/webgl2/extension/EXT_texture_filter_anisotropic
 http://webglstats.com/webgl2/extension/OES_texture_float_linear

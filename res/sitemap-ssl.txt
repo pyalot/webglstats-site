@@ -100,7 +100,9 @@ https://webglstats.com/webgl2/extension/WEBGL_compressed_texture_pvrtc
 https://webglstats.com/webgl2/extension/WEBGL_compressed_texture_s3tc
 https://webglstats.com/webgl2/extension/WEBGL_debug_renderer_info
 https://webglstats.com/webgl2/extension/EXT_disjoint_timer_query
-https://webglstats.com/extension/EXT_disjoint_timer_query_webgl2
+https://webglstats.com/webgl2/extension/EXT_disjoint_timer_query_webgl2
 https://webglstats.com/webgl2/extension/WEBGL_lose_context
 https://webglstats.com/webgl2/extension/EXT_texture_filter_anisotropic
 https://webglstats.com/webgl2/extension/OES_texture_float_linear
+https://webglstats.com/webgl/extension/WEBGL_compressed_texture_astc
+https://webglstats.com/webgl2/extension/WEBGL_compressed_texture_astc
