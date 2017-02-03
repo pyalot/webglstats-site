@@ -61,6 +61,7 @@ ramsol.in
 boxbase.org
 greencarbody.de
 geeks3d.com
+usecubes.com
 '''.trim().split('\n')
 
 exports.index = class Contributors
