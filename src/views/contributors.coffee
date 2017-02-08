@@ -4,6 +4,8 @@ behavior = sys.import 'behavior'
 breadcrumbs = sys.import 'breadcrumbs'
 
 referrers = '''
+babylonjs.com
+usecubes.com
 glad.dav1d.de
 mappable.com
 beta.archilogic.com
@@ -61,7 +63,6 @@ ramsol.in
 boxbase.org
 greencarbody.de
 geeks3d.com
-usecubes.com
 '''.trim().split('\n')
 
 exports.index = class Contributors
