@@ -4,6 +4,7 @@ behavior = sys.import 'behavior'
 breadcrumbs = sys.import 'breadcrumbs'
 
 referrers = '''
+delight-vr.com
 babylonjs.com
 usecubes.com
 glad.dav1d.de
